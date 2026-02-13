@@ -2,6 +2,9 @@
 
 一键为多人生成个性化节日祝福视频，支持 AI 语音克隆和智能文案生成。
 
+## Demo Link
+https://spring-festival-video-20002534016.asia-southeast1.run.app/
+
 ## ✨ 功能特性
 
 - 🎥 **批量生成**：上传一段示例视频，为多人生成个性化祝福
