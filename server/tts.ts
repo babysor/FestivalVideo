@@ -8,7 +8,7 @@ import fetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';
 
-const TTS_ENDPOINT = process.env.TTS_ENDPOINT || 'http://34.158.211.232:6006/tts';
+const TTS_ENDPOINT = process.env.TTS_ENDPOINT;
 const TTS_CONCURRENCY = parseInt(process.env.TTS_CONCURRENCY || '10', 10);
 
 // Check if custom TTS is configured
