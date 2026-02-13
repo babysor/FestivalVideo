@@ -1,0 +1,32 @@
+{
+  "name": "spring-festival-video",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "studio": "npx remotion studio",
+    "build": "npx remotion render SpringFestivalVideo out/video.mp4",
+    "upgrade": "npx remotion upgrade",
+    "server": "npx tsx server/index.ts",
+    "start": "npx tsx server/index.ts"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.259",
+    "@remotion/player": "4.0.259",
+    "express": "^4.21.0",
+    "form-data": "^4.0.5",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^2.7.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "4.0.259",
+    "tsx": "^4.19.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
+    "@types/react": "^18.3.12",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  }
+}

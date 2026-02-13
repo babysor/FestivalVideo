@@ -1,0 +1,24 @@
+# 依赖 (容器内重新安装)
+node_modules/
+
+# 渲染输出 / 上传文件 / 临时文件
+out/
+public/uploads/
+tmp/
+
+# 根目录散落的视频
+*.mp4
+
+# 环境变量 (通过 Cloud Run 注入)
+.env
+
+# macOS
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/

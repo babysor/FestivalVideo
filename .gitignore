@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+out/
+dist/
+.next/
+
+# Temp files
+tmp/
+
+# Environment variables
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Video files (large binary assets)
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Logs
+*.log
+npm-debug.log*
+
+# only for Noiz deploy
+deploy.sh 
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+uploads/

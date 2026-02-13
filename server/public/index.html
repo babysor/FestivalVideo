@@ -1,0 +1,2207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💝 节日祝福视频批量生成器</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(3deg); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px var(--glow-color, rgba(255, 215, 0, 0.3)); }
+      50% { box-shadow: 0 0 40px var(--glow-color-strong, rgba(255, 215, 0, 0.6)); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes progressPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* ===== 节日主题 CSS 变量 ===== */
+    :root {
+      /* 春节主题（默认） */
+      --bg-gradient: linear-gradient(135deg, #1a0000 0%, #3d0000 30%, #8b0000 60%, #5c0000 100%);
+      --primary: #ffd700;
+      --primary-dark: #ff8c00;
+      --accent-bg: rgba(139, 0, 0, 0.6);
+      --accent-bg-dark: rgba(60, 0, 0, 0.8);
+      --text-main: #fff5e6;
+      --text-secondary: #ffcccc;
+      --text-label: #ffccaa;
+      --border-color: rgba(255, 215, 0, 0.2);
+      --border-color-strong: rgba(255, 215, 0, 0.3);
+      --btn-text: #8b0000;
+      --glow-color: rgba(255, 215, 0, 0.3);
+      --glow-color-strong: rgba(255, 215, 0, 0.6);
+      --particle-colors: #ffd700, #ff6b6b, #ffaa00, #ff4444, #fff5b0;
+    }
+
+    body.valentine {
+      --bg-gradient: linear-gradient(135deg, #1a0010 0%, #3d0020 30%, #8b1050 60%, #5c0040 100%);
+      --primary: #ff69b4;
+      --primary-dark: #ff1493;
+      --accent-bg: rgba(139, 16, 80, 0.6);
+      --accent-bg-dark: rgba(60, 0, 32, 0.8);
+      --text-main: #fff0f5;
+      --text-secondary: #ffb6c1;
+      --text-label: #ffb6c1;
+      --border-color: rgba(255, 105, 180, 0.2);
+      --border-color-strong: rgba(255, 105, 180, 0.3);
+      --btn-text: #5c0040;
+      --glow-color: rgba(255, 105, 180, 0.3);
+      --glow-color-strong: rgba(255, 105, 180, 0.6);
+      --particle-colors: #ff69b4, #ff1493, #ffb6c1, #ff85c0, #ffd700;
+    }
+
+    body {
+      font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      color: var(--text-main);
+      overflow-x: hidden;
+      transition: background 0.6s ease;
+    }
+
+    .bg-particles {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .bg-particles .particle {
+      position: absolute;
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+
+    /* ===== 节日切换器 ===== */
+    .festival-switcher {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 28px;
+      animation: fadeInUp 0.6s ease;
+    }
+    .festival-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 10px 20px;
+      border-radius: 12px;
+      transition: all 0.3s;
+      user-select: none;
+      border: 2px solid transparent;
+      opacity: 0.5;
+    }
+    .festival-option.active {
+      opacity: 1;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .festival-option:hover:not(.active) {
+      opacity: 0.75;
+    }
+    .festival-option .festival-emoji {
+      font-size: 28px;
+    }
+    .festival-toggle-track {
+      position: relative;
+      width: 64px;
+      height: 32px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+    .festival-toggle-track .toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--primary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .festival-toggle-track.valentine .toggle-thumb {
+      left: 35px;
+    }
+
+    /* 标题 */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInUp 0.8s ease;
+    }
+    .header .lantern {
+      font-size: 48px;
+      animation: float 3s ease-in-out infinite;
+      display: inline-block;
+    }
+    .header h1 {
+      font-size: 34px;
+      font-weight: 900;
+      margin: 16px 0 8px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark), var(--primary), #fff5b0, var(--primary));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+      transition: background 0.3s;
+    }
+    .header p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      opacity: 0.8;
+      line-height: 1.6;
+    }
+
+    /* 卡片 */
+    .card {
+      background: linear-gradient(145deg, var(--accent-bg), var(--accent-bg-dark));
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.8s ease;
+      transition: background 0.4s, border-color 0.4s;
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title .num {
+      width: 26px;
+      height: 26px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: var(--btn-text);
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    /* 输入框 */
+    .input-group {
+      margin-bottom: 14px;
+    }
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-label);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .text-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color-strong);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--text-main);
+      font-size: 16px;
+      font-weight: 600;
+      outline: none;
+      transition: all 0.3s;
+    }
+    .text-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 16px var(--glow-color);
+    }
+    .text-input::placeholder {
+      color: rgba(255, 245, 230, 0.3);
+      font-weight: 400;
+    }
+
+    /* 视频模式切换 Tabs */
+    .video-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 14px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    .video-tab {
+      flex: 1;
+      padding: 10px 0;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text-label);
+      border: none;
+      outline: none;
+    }
+    .video-tab:not(:last-child) {
+      border-right: 1px solid var(--border-color);
+    }
+    .video-tab.active {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 140, 0, 0.15));
+      color: var(--primary);
+    }
+    .video-tab:hover:not(.active) {
+      background: rgba(255, 215, 0, 0.06);
+    }
+    .video-panel { display: none; }
+    .video-panel.active { display: block; }
+
+    /* 视频上传 */
+    .upload-area {
+      border: 2px dashed var(--border-color-strong);
+      border-radius: 14px;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: rgba(0, 0, 0, 0.15);
+    }
+    .upload-area:hover {
+      border-color: var(--primary);
+      background: rgba(255, 215, 0, 0.05);
+    }
+    .upload-area.has-file {
+      border-color: #4caf50;
+      background: rgba(76, 175, 80, 0.1);
+    }
+    .upload-area .upload-icon { font-size: 42px; margin-bottom: 10px; }
+    .upload-area .upload-text { font-size: 15px; color: var(--text-label); margin-bottom: 6px; }
+    .upload-area .upload-hint { font-size: 12px; color: rgba(255, 204, 170, 0.5); }
+    .upload-area .file-name { font-size: 13px; color: #4caf50; font-weight: 600; margin-top: 6px; }
+    .upload-area input[type="file"] { display: none; }
+    .upload-area video {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    /* 视频录制 */
+    .record-area {
+      border: 2px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.3);
+    }
+    .record-preview {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      max-height: 360px;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .record-preview video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .record-preview .placeholder {
+      text-align: center;
+      color: rgba(255, 245, 230, 0.4);
+    }
+    .record-preview .placeholder .cam-icon { font-size: 48px; margin-bottom: 10px; }
+    .record-preview .placeholder p { font-size: 13px; }
+    .record-timer {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #ff4444;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+    .record-timer.active { display: flex; }
+    .record-timer .rec-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff4444;
+      animation: progressPulse 1s ease-in-out infinite;
+    }
+    .record-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 16px;
+    }
+    .btn-record {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 3px solid var(--text-main);
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-record:hover { border-color: var(--primary); }
+    .btn-record .inner {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ff4444;
+      transition: all 0.25s;
+    }
+    .btn-record.recording .inner {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: #ff4444;
+    }
+    .btn-record-action {
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid var(--border-color-strong);
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--primary);
+    }
+    .btn-record-action:hover {
+      background: rgba(255, 215, 0, 0.1);
+      border-color: var(--primary);
+    }
+    .record-done-bar {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px;
+      background: rgba(76, 175, 80, 0.08);
+      border-top: 1px solid rgba(76, 175, 80, 0.2);
+    }
+    .record-done-bar.active { display: flex; }
+    .record-done-bar .done-text { font-size: 13px; color: #4caf50; font-weight: 600; }
+
+    /* TTS 开关 */
+    .tts-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      user-select: none;
+    }
+    .tts-option:hover { background: rgba(255, 215, 0, 0.06); }
+    .tts-option.active {
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid var(--border-color-strong);
+    }
+    .tts-switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .tts-switch input { display: none; }
+    .tts-switch .slider {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 26px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .tts-switch .slider::before {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff5e6;
+      border-radius: 50%;
+      transition: all 0.3s;
+    }
+    .tts-switch input:checked + .slider {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    }
+    .tts-switch input:checked + .slider::before {
+      transform: translateX(22px);
+    }
+    .tts-info { flex: 1; }
+    .tts-info .tts-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; }
+    .tts-info .tts-desc { font-size: 11px; color: var(--text-label); opacity: 0.6; line-height: 1.5; }
+    .tts-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--btn-text);
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    /* 收信人列表 */
+    .recipient-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .recipient-row {
+      display: grid;
+      grid-template-columns: 1fr 1.8fr auto;
+      gap: 8px;
+      align-items: end;
+      padding: 14px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      animation: fadeInUp 0.3s ease;
+      position: relative;
+    }
+    .recipient-row .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .recipient-row .field label {
+      font-size: 11px;
+      color: var(--text-label);
+      opacity: 0.7;
+    }
+    .recipient-row .field input {
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: all 0.3s;
+      width: 100%;
+    }
+    .recipient-row .field input:focus {
+      border-color: var(--primary);
+    }
+    .recipient-row .field input::placeholder {
+      color: rgba(255, 245, 230, 0.25);
+      font-size: 12px;
+    }
+    .recipient-row .row-num {
+      position: absolute;
+      top: -8px;
+      left: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--btn-text);
+      font-size: 10px;
+      font-weight: 900;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-remove {
+      background: rgba(255, 60, 60, 0.2);
+      border: 1px solid rgba(255, 60, 60, 0.3);
+      color: #ff6b6b;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      flex-shrink: 0;
+      margin-bottom: 1px;
+    }
+    .btn-remove:hover {
+      background: rgba(255, 60, 60, 0.4);
+      border-color: #ff4444;
+    }
+    .btn-add {
+      width: 100%;
+      padding: 12px;
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      background: transparent;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 4px;
+    }
+    .btn-add:hover {
+      border-color: var(--primary);
+      background: rgba(255, 215, 0, 0.06);
+    }
+    .recipient-hint {
+      font-size: 12px;
+      color: var(--text-label);
+      opacity: 0.5;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    /* 提交按钮 */
+    .submit-btn {
+      width: 100%;
+      padding: 18px;
+      border: none;
+      border-radius: 16px;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--btn-text);
+      letter-spacing: 4px;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--glow-color-strong);
+    }
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      animation: none;
+    }
+
+    /* 进度区域 */
+    .progress-section {
+      display: none;
+      animation: fadeInUp 0.6s ease;
+    }
+    .progress-section.active { display: block; }
+    .progress-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .progress-header h3 {
+      font-size: 22px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    .progress-header p {
+      font-size: 14px;
+      color: var(--text-label);
+      opacity: 0.7;
+    }
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+    .progress-items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .progress-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+    .progress-item .status-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .progress-item .status-icon.pending {
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.3);
+    }
+    .progress-item .status-icon.processing {
+      background: rgba(255, 215, 0, 0.15);
+      animation: progressPulse 1.2s ease-in-out infinite;
+      color: var(--primary);
+    }
+    .progress-item .status-icon.done {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
+    }
+    .progress-item .status-icon.error {
+      background: rgba(255, 60, 60, 0.2);
+      color: #ff4444;
+    }
+    .progress-item .item-info { flex: 1; }
+    .progress-item .item-name { font-size: 15px; font-weight: 700; color: var(--text-main); }
+    .progress-item .item-detail { font-size: 12px; color: var(--text-label); opacity: 0.6; margin-top: 2px; }
+
+    /* 结果区域 */
+    .result-section {
+      display: none;
+      animation: fadeInUp 0.6s ease;
+    }
+    .result-section.active { display: block; }
+    .result-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .result-header h3 {
+      font-size: 24px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    .result-header p {
+      font-size: 14px;
+      color: var(--text-label);
+      opacity: 0.7;
+    }
+    .result-actions-top {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .result-items {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .result-item {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      align-items: center;
+    }
+    .result-item video {
+      width: 140px;
+      aspect-ratio: 9 / 16;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #000;
+      flex-shrink: 0;
+    }
+    .result-item .result-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .result-item .result-name {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--primary);
+    }
+    .result-item .result-relation {
+      font-size: 13px;
+      color: var(--text-label);
+      opacity: 0.7;
+    }
+    .result-item .result-status-error {
+      font-size: 13px;
+      color: #ff6b6b;
+    }
+    .result-item a.btn-download-single {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--btn-text);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+      width: fit-content;
+    }
+    .result-item a.btn-download-single:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px var(--glow-color);
+    }
+
+    /* 通用按钮 */
+    .btn-primary {
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--btn-text);
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px var(--glow-color);
+    }
+    .btn-secondary {
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: transparent;
+      border: 2px solid var(--border-color-strong);
+      color: var(--primary);
+    }
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      background: rgba(255, 215, 0, 0.1);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 48px;
+      padding: 20px;
+      color: var(--text-label);
+      opacity: 0.3;
+      font-size: 13px;
+    }
+
+    /* ===== 台词预览区域 ===== */
+    .preview-section {
+      display: none;
+      animation: fadeInUp 0.6s ease;
+    }
+    .preview-section.active { display: block; }
+    .preview-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .preview-header h3 {
+      font-size: 22px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    .preview-header p {
+      font-size: 14px;
+      color: var(--text-label);
+      opacity: 0.7;
+      line-height: 1.6;
+    }
+    .preview-countdown {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .preview-countdown .countdown-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .preview-countdown .countdown-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      border-radius: 3px;
+      transition: width 0.3s linear;
+      width: 100%;
+    }
+    .preview-countdown .countdown-text {
+      font-size: 13px;
+      color: var(--text-label);
+      opacity: 0.7;
+    }
+    .preview-countdown .countdown-text .countdown-num {
+      font-weight: 900;
+      color: var(--primary);
+      font-size: 15px;
+      font-variant-numeric: tabular-nums;
+    }
+    .preview-items {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .preview-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 18px;
+      animation: fadeInUp 0.4s ease;
+      transition: border-color 0.3s;
+    }
+    .preview-card:hover {
+      border-color: var(--border-color-strong);
+    }
+    .preview-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .preview-card-header .preview-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--btn-text);
+      flex-shrink: 0;
+    }
+    .preview-card-header .preview-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .preview-card-header .preview-relation {
+      font-size: 12px;
+      color: var(--text-label);
+      opacity: 0.6;
+    }
+    .preview-card-header .preview-theme-badge {
+      margin-left: auto;
+      padding: 3px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-label);
+      border: 1px solid var(--border-color);
+    }
+    .preview-field {
+      margin-bottom: 12px;
+    }
+    .preview-field:last-child {
+      margin-bottom: 0;
+    }
+    .preview-field-label {
+      font-size: 11px;
+      color: var(--text-label);
+      opacity: 0.6;
+      margin-bottom: 4px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .preview-field-value {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text-main);
+      font-size: 14px;
+      line-height: 1.6;
+      outline: none;
+      transition: all 0.3s;
+      resize: vertical;
+      min-height: 38px;
+      font-family: inherit;
+    }
+    .preview-field-value:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 12px var(--glow-color);
+    }
+    .preview-field-value.readonly {
+      opacity: 0.7;
+      cursor: default;
+    }
+    .preview-blessings-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .preview-blessing-tag {
+      padding: 6px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: all 0.3s;
+      min-width: 60px;
+      text-align: center;
+      font-family: inherit;
+    }
+    .preview-blessing-tag:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 8px var(--glow-color);
+    }
+    .preview-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .preview-actions .btn-confirm {
+      padding: 16px 40px;
+      border: none;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--btn-text);
+      letter-spacing: 2px;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    .preview-actions .btn-confirm:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--glow-color-strong);
+    }
+    .preview-actions .btn-confirm:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      animation: none;
+    }
+    .preview-actions .btn-back {
+      padding: 16px 28px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: transparent;
+      border: 2px solid var(--border-color-strong);
+      color: var(--primary);
+    }
+    .preview-actions .btn-back:hover {
+      border-color: var(--primary);
+      background: rgba(255, 215, 0, 0.1);
+    }
+    .preview-edit-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-label);
+      opacity: 0.5;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    /* 响应式 */
+    @media (max-width: 600px) {
+      .recipient-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .btn-remove {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+      }
+      .result-item {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .result-item video {
+        width: 100%;
+        max-width: 240px;
+        aspect-ratio: 9 / 16;
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+<body class="valentine">
+
+<div class="bg-particles" id="particles"></div>
+
+<div class="container">
+  <!-- 节日切换 -->
+  <div class="festival-switcher">
+    <div class="festival-option" id="optSpring" onclick="switchFestival('spring')">
+      <span class="festival-emoji">🧧</span>
+      <span>春节</span>
+    </div>
+    <div class="festival-toggle-track valentine" id="festivalToggle" onclick="toggleFestival()">
+      <div class="toggle-thumb"></div>
+    </div>
+    <div class="festival-option active" id="optValentine" onclick="switchFestival('valentine')">
+      <span class="festival-emoji">💝</span>
+      <span>情人节</span>
+    </div>
+  </div>
+
+  <!-- 标题 -->
+  <div class="header">
+    <div class="lantern" id="headerEmoji">💘</div>
+    <h1 id="headerTitle">情人节表白视频批量生成</h1>
+    <p id="headerDesc">
+      上传或现场录制极短示例祝福，输入TA的名字，为每个人生成专属情人节视频
+    </p>
+  </div>
+
+  <!-- ===== 表单区域 ===== -->
+  <div id="formSection">
+    <!-- Step 1: 您的信息 + 视频 -->
+    <div class="card" style="animation-delay: 0.05s">
+      <div class="input-group">
+        <label>您的名字（显示在每个视频的结尾署名）</label>
+        <input type="text" class="text-input" id="senderNameInput" placeholder="例如：小明" maxlength="20">
+      </div>
+      <div style="margin-top: 16px;">
+        <label id="videoLabel" style="display:block; font-size:13px; color:var(--text-label); margin-bottom:8px; font-weight:500;">
+          提供一段祝福视频（录一句情人节祝福语，3-10秒）
+        </label>
+        <div class="video-tabs">
+          <button class="video-tab active" onclick="switchVideoMode('upload')">📁 上传视频</button>
+          <button class="video-tab" onclick="switchVideoMode('record')">📹 现场录制</button>
+        </div>
+
+        <!-- 上传面板 -->
+        <div class="video-panel active" id="panelUpload">
+          <div class="upload-area" id="uploadArea" onclick="document.getElementById('videoInput').click()">
+            <div class="upload-icon">🎥</div>
+            <div class="upload-text">点击上传或拖拽视频到此处</div>
+            <div class="upload-hint">支持 MP4 格式，3-10秒，最大 50MB · 视频中请包含你的说话声音</div>
+            <input type="file" id="videoInput" accept="video/mp4,video/*">
+          </div>
+        </div>
+
+        <!-- 录制面板 -->
+        <div class="video-panel" id="panelRecord">
+          <div class="record-area" id="recordArea">
+            <div class="record-preview" id="recordPreview">
+              <div class="placeholder" id="recordPlaceholder">
+                <div class="cam-icon">📷</div>
+                <p>点击下方按钮开启摄像头</p>
+              </div>
+              <video id="cameraFeed" autoplay muted playsinline style="display:none;"></video>
+              <video id="recordPlayback" controls playsinline style="display:none;"></video>
+              <div class="record-timer" id="recordTimer">
+                <span class="rec-dot"></span>
+                <span id="recordTimerText">00:00</span>
+              </div>
+            </div>
+            <div class="record-controls" id="recordControls">
+              <button class="btn-record-action" id="btnOpenCamera" onclick="openCamera()">🎥 开启摄像头</button>
+              <button class="btn-record" id="btnRecord" onclick="toggleRecording()" style="display:none;" title="开始录制">
+                <div class="inner"></div>
+              </button>
+            </div>
+            <div class="record-done-bar" id="recordDoneBar">
+              <span class="done-text" id="recordDoneText">✅ 录制完成</span>
+              <button class="btn-record-action" onclick="retakeRecording()">🔄 重新录制</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: 祝福对象列表 -->
+    <div class="card" style="animation-delay: 0.1s">
+      <div class="card-title">
+        <span class="num">2</span>
+        添加祝福对象
+      </div>
+      <div class="recipient-list" id="recipientList">
+        <!-- JS 动态生成 -->
+      </div>
+      <button class="btn-add" onclick="addRecipient()">+ 添加一位祝福对象</button>
+      <div class="recipient-hint" id="recipientHint">
+        💡 在「关系与背景」中填写关系和背景信息，用逗号分隔<br>
+        💡 例如：女朋友，异地恋 / 闺蜜，刚分手 / 老婆，结婚纪念日<br>
+        💝 AI 会根据关系自动选择最匹配的视频风格
+      </div>
+    </div>
+
+    <!-- 提交 -->
+    <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
+      <span id="submitBtnText">💝 一键生成全部祝福视频</span>
+    </button>
+  </div>
+
+  <!-- ===== 台词预览区域 ===== -->
+  <div class="preview-section" id="previewSection">
+    <div class="card">
+      <div class="preview-header">
+        <h3 id="previewTitle">📝 台词预览</h3>
+        <p>AI 已为每位收信人生成个性化台词，请检查确认。可直接编辑修改。</p>
+      </div>
+      <div class="preview-countdown" id="previewCountdown">
+        <div class="countdown-bar">
+          <div class="countdown-fill" id="countdownFill"></div>
+        </div>
+        <div class="countdown-text">
+          <span class="countdown-num" id="countdownNum"></span> 秒后自动开始制作视频
+        </div>
+      </div>
+      <div class="preview-items" id="previewItems">
+        <!-- JS 动态生成 -->
+      </div>
+      <div class="preview-actions">
+        <button class="btn-back" onclick="backToForm()">← 返回修改</button>
+        <button class="btn-confirm" id="btnConfirm" onclick="confirmAndRender()">
+          ✨ 确认台词，开始制作
+        </button>
+      </div>
+      <div class="preview-edit-hint">
+        💡 点击任意文字可直接编辑 · 编辑时倒计时自动暂停
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 进度区域 ===== -->
+  <div class="progress-section" id="progressSection">
+    <div class="card">
+      <div class="progress-header">
+        <h3 id="progressTitle">🎬 正在生成祝福视频...</h3>
+        <p id="progressSub">请耐心等待，每个视频约需 30-60 秒</p>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-items" id="progressItems">
+        <!-- JS 动态生成 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 结果区域 ===== -->
+  <div class="result-section" id="resultSection">
+    <div class="result-header">
+      <h3>🎉 祝福视频生成完成！</h3>
+      <p id="resultSummary"></p>
+    </div>
+    <div class="result-actions-top">
+      <button class="btn-primary" id="downloadAllBtn" onclick="downloadAll()">📦 打包下载全部</button>
+      <button class="btn-secondary" onclick="resetForm()">🔄 再做一批</button>
+    </div>
+    <div class="result-items" id="resultItems">
+      <!-- JS 动态生成 -->
+    </div>
+  </div>
+
+  <div class="footer" id="pageFooter">
+    💝 2026 · Happy Valentine's Day 💝
+  </div>
+</div>
+
+<script>
+  // ==================== 状态 ====================
+  let selectedVideoFile = null;
+  let currentBatchId = null;
+  let pollTimer = null;
+  let currentFestival = "valentine"; // "spring" | "valentine"
+
+  // 录制相关状态
+  let cameraStream = null;
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let recordStartTime = null;
+  let recordTimerInterval = null;
+  let currentVideoMode = "upload"; // "upload" | "record"
+
+  // ==================== 节日配置 ====================
+  const FESTIVAL_CONFIG = {
+    spring: {
+      emoji: "🏮",
+      title: "春节祝福视频批量生成",
+      desc: "上传或现场录制极短示例祝福，输入朋友列表，为每个人生成专属祝福视频",
+      videoLabel: "提供一段祝福视频（录一句通用的新年祝福语，3-10秒）",
+      submitText: "🧧 一键生成全部祝福视频",
+      footer: "🧧 2026 丙午马年 · 新春快乐 🧧",
+      particleColors: ["#ffd700", "#ff6b6b", "#ffaa00", "#ff4444", "#fff5b0"],
+      recipientHint: `💡 在「关系与背景」中填写关系和背景信息，用逗号分隔<br>💡 例如：发小，刚升职 / 妈妈，身体健康 / 领导，事业巅峰<br>🎨 AI 会根据对方身份自动选择最匹配的视频风格`,
+      namePlaceholder: "张三",
+      relationPlaceholder: "发小，事业巅峰",
+    },
+    valentine: {
+      emoji: "💘",
+      title: "情人节表白视频批量生成",
+      desc: "上传或现场录制极短示例祝福，输入TA的名字，为每个人生成专属情人节视频",
+      videoLabel: "提供一段表白视频（录一句情人节表白语，3-10秒）",
+      submitText: "💝 一键生成全部表白视频",
+      footer: "💝 2026 · Happy Valentine's Day 💝",
+      particleColors: ["#ff69b4", "#ff1493", "#ffb6c1", "#ff85c0", "#ffd700"],
+      recipientHint: `💡 在「关系与背景」中填写关系和背景信息，用逗号分隔<br>💡 例如：女朋友，异地恋 / 闺蜜，刚分手 / 老婆，结婚纪念日<br>💝 AI 会根据关系自动选择最匹配的视频风格`,
+      namePlaceholder: "小美",
+      relationPlaceholder: "女朋友，异地恋",
+    },
+  };
+
+  // ==================== 节日切换 ====================
+  function switchFestival(festival) {
+    if (festival === currentFestival) return;
+    currentFestival = festival;
+
+    const config = FESTIVAL_CONFIG[festival];
+
+    // 切换 body class
+    document.body.classList.toggle("valentine", festival === "valentine");
+
+    // 更新 toggle
+    document.getElementById("festivalToggle").classList.toggle("valentine", festival === "valentine");
+    document.getElementById("optSpring").classList.toggle("active", festival === "spring");
+    document.getElementById("optValentine").classList.toggle("active", festival === "valentine");
+
+    // 更新文案
+    document.getElementById("headerEmoji").textContent = config.emoji;
+    document.getElementById("headerTitle").textContent = config.title;
+    document.getElementById("headerDesc").textContent = config.desc;
+    document.getElementById("videoLabel").textContent = config.videoLabel;
+    document.getElementById("submitBtnText").textContent = config.submitText;
+    document.getElementById("pageFooter").textContent = config.footer;
+
+    // 更新收信人提示
+    const hint = document.getElementById("recipientHint");
+    if (hint) hint.innerHTML = config.recipientHint;
+
+    // 更新 placeholder
+    document.querySelectorAll(".r-name").forEach(el => {
+      el.placeholder = config.namePlaceholder;
+    });
+    document.querySelectorAll(".r-relation-bg").forEach(el => {
+      el.placeholder = config.relationPlaceholder;
+    });
+
+    // 重新生成粒子
+    recreateParticles();
+  }
+
+  function toggleFestival() {
+    switchFestival(currentFestival === "spring" ? "valentine" : "spring");
+  }
+
+  // ==================== 初始化 ====================
+  async function init() {
+    createParticles();
+    setupUpload();
+    // 默认添加 3 个空行
+    addRecipient();
+    addRecipient();
+    addRecipient();
+  }
+
+  // ==================== 背景粒子 ====================
+  function createParticles() {
+    const container = document.getElementById("particles");
+    const config = FESTIVAL_CONFIG[currentFestival];
+    const colors = config.particleColors;
+    for (let i = 0; i < 25; i++) {
+      const p = document.createElement("div");
+      p.className = "particle";
+      const size = 3 + Math.random() * 6;
+      p.style.cssText = `
+        width: ${size}px; height: ${size}px;
+        left: ${Math.random() * 100}%;
+        top: ${Math.random() * 100}%;
+        background: ${colors[i % colors.length]};
+        opacity: ${0.15 + Math.random() * 0.2};
+        animation-delay: ${Math.random() * 6}s;
+        animation-duration: ${4 + Math.random() * 4}s;
+      `;
+      container.appendChild(p);
+    }
+  }
+
+  function recreateParticles() {
+    const container = document.getElementById("particles");
+    container.innerHTML = "";
+    createParticles();
+  }
+
+  // ==================== 视频上传 ====================
+  function setupUpload() {
+    const area = document.getElementById("uploadArea");
+    const input = document.getElementById("videoInput");
+
+    area.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      area.style.borderColor = "rgba(255, 215, 0, 0.8)";
+    });
+    area.addEventListener("dragleave", () => {
+      area.style.borderColor = "";
+    });
+    area.addEventListener("drop", (e) => {
+      e.preventDefault();
+      area.style.borderColor = "";
+      if (e.dataTransfer.files[0]) {
+        input.files = e.dataTransfer.files;
+        handleFileSelect(e.dataTransfer.files[0]);
+      }
+    });
+    input.addEventListener("change", () => {
+      if (input.files[0]) handleFileSelect(input.files[0]);
+    });
+  }
+
+  function handleFileSelect(file) {
+    const area = document.getElementById("uploadArea");
+    area.classList.add("has-file");
+    selectedVideoFile = file;
+
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(video.src);
+      const duration = video.duration;
+      if (duration < 2 || duration > 30) {
+        selectedVideoFile = null;
+        area.innerHTML = `
+          <div class="upload-icon">⚠️</div>
+          <div class="upload-text" style="color: #ff6b6b;">视频时长 ${duration.toFixed(1)}秒，建议3-10秒</div>
+          <div class="upload-hint">点击重新选择</div>
+          <input type="file" id="videoInput" accept="video/mp4,video/*">
+        `;
+        area.classList.remove("has-file");
+        setupUpload();
+        return;
+      }
+      area.innerHTML = `
+        <div class="upload-icon">✅</div>
+        <div class="upload-text">视频已选择</div>
+        <div class="file-name">${file.name} (${duration.toFixed(1)}秒, ${(file.size / 1024 / 1024).toFixed(1)}MB)</div>
+        <video src="${URL.createObjectURL(file)}" muted loop autoplay playsinline></video>
+        <div class="upload-hint" style="margin-top: 8px;">点击更换视频</div>
+        <input type="file" id="videoInput" accept="video/mp4,video/*">
+      `;
+      setupUpload();
+    };
+    video.src = URL.createObjectURL(file);
+  }
+
+  // ==================== 视频模式切换 ====================
+  function switchVideoMode(mode) {
+    currentVideoMode = mode;
+    // 更新 tab 样式
+    document.querySelectorAll(".video-tab").forEach((tab, i) => {
+      tab.classList.toggle("active", (i === 0 && mode === "upload") || (i === 1 && mode === "record"));
+    });
+    document.getElementById("panelUpload").classList.toggle("active", mode === "upload");
+    document.getElementById("panelRecord").classList.toggle("active", mode === "record");
+
+    // 切到上传时关闭摄像头
+    if (mode === "upload") {
+      stopCamera();
+    }
+  }
+
+  // ==================== 摄像头 & 录制 ====================
+  async function openCamera() {
+    try {
+      // 优先请求前置摄像头
+      cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 1080 }, height: { ideal: 1920 } },
+        audio: true,
+      });
+
+      const cameraFeed = document.getElementById("cameraFeed");
+      const playback = document.getElementById("recordPlayback");
+      const placeholder = document.getElementById("recordPlaceholder");
+      const btnOpen = document.getElementById("btnOpenCamera");
+      const btnRecord = document.getElementById("btnRecord");
+
+      cameraFeed.srcObject = cameraStream;
+      cameraFeed.style.display = "block";
+      playback.style.display = "none";
+      placeholder.style.display = "none";
+      btnOpen.style.display = "none";
+      btnRecord.style.display = "flex";
+
+      // 如果之前有录制结果，清除
+      document.getElementById("recordDoneBar").classList.remove("active");
+    } catch (err) {
+      console.error("摄像头访问失败:", err);
+      if (err.name === "NotAllowedError") {
+        alert("请允许访问摄像头和麦克风权限后重试");
+      } else if (err.name === "NotFoundError") {
+        alert("未检测到摄像头设备");
+      } else {
+        alert("摄像头开启失败: " + err.message);
+      }
+    }
+  }
+
+  function stopCamera() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((t) => t.stop());
+      cameraStream = null;
+    }
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
+      mediaRecorder = null;
+    }
+    clearInterval(recordTimerInterval);
+    recordTimerInterval = null;
+  }
+
+  function toggleRecording() {
+    if (!mediaRecorder || mediaRecorder.state === "inactive") {
+      startRecording();
+    } else {
+      stopRecording();
+    }
+  }
+
+  function startRecording() {
+    if (!cameraStream) return;
+
+    recordedChunks = [];
+
+    // 选择支持的 MIME 类型
+    const mimeOptions = [
+      "video/webm;codecs=vp9,opus",
+      "video/webm;codecs=vp8,opus",
+      "video/webm",
+      "video/mp4",
+    ];
+    let mimeType = "";
+    for (const m of mimeOptions) {
+      if (MediaRecorder.isTypeSupported(m)) { mimeType = m; break; }
+    }
+
+    mediaRecorder = new MediaRecorder(cameraStream, mimeType ? { mimeType } : {});
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      onRecordingStopped();
+    };
+
+    mediaRecorder.start(100); // 每 100ms 收集一次数据
+
+    // UI：红色录制状态
+    const btnRecord = document.getElementById("btnRecord");
+    btnRecord.classList.add("recording");
+    btnRecord.title = "停止录制";
+
+    // 启动计时器
+    recordStartTime = Date.now();
+    const timer = document.getElementById("recordTimer");
+    timer.classList.add("active");
+    updateRecordTimer();
+    recordTimerInterval = setInterval(updateRecordTimer, 200);
+
+    // 自动在 15 秒后停止（安全上限）
+    setTimeout(() => {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        stopRecording();
+      }
+    }, 15000);
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+    }
+    clearInterval(recordTimerInterval);
+    recordTimerInterval = null;
+
+    // 停止计时器动画
+    document.getElementById("recordTimer").classList.remove("active");
+    document.getElementById("btnRecord").classList.remove("recording");
+    document.getElementById("btnRecord").title = "开始录制";
+  }
+
+  function updateRecordTimer() {
+    const elapsed = (Date.now() - recordStartTime) / 1000;
+    const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
+    const secs = String(Math.floor(elapsed % 60)).padStart(2, "0");
+    document.getElementById("recordTimerText").textContent = `${mins}:${secs}`;
+  }
+
+  function onRecordingStopped() {
+    // 停止摄像头
+    stopCamera();
+
+    const blob = new Blob(recordedChunks, { type: recordedChunks[0]?.type || "video/webm" });
+    const duration = ((Date.now() - recordStartTime) / 1000).toFixed(1);
+
+    // 检查时长
+    if (parseFloat(duration) < 2) {
+      alert("录制太短啦，请至少录 3 秒");
+      retakeRecording();
+      return;
+    }
+
+    // 将 blob 转为 File
+    const ext = blob.type.includes("mp4") ? "mp4" : "webm";
+    const file = new File([blob], `recording_${Date.now()}.${ext}`, { type: blob.type });
+    selectedVideoFile = file;
+
+    // 切换到回放视图
+    const cameraFeed = document.getElementById("cameraFeed");
+    const playback = document.getElementById("recordPlayback");
+    const btnRecord = document.getElementById("btnRecord");
+    const doneBar = document.getElementById("recordDoneBar");
+    const doneText = document.getElementById("recordDoneText");
+
+    cameraFeed.style.display = "none";
+    playback.src = URL.createObjectURL(blob);
+    playback.style.display = "block";
+    btnRecord.style.display = "none";
+    doneBar.classList.add("active");
+    doneText.textContent = `✅ 录制完成 (${duration}秒, ${(file.size / 1024 / 1024).toFixed(1)}MB)`;
+  }
+
+  function retakeRecording() {
+    selectedVideoFile = null;
+    recordedChunks = [];
+
+    const cameraFeed = document.getElementById("cameraFeed");
+    const playback = document.getElementById("recordPlayback");
+    const placeholder = document.getElementById("recordPlaceholder");
+    const btnOpen = document.getElementById("btnOpenCamera");
+    const btnRecord = document.getElementById("btnRecord");
+    const doneBar = document.getElementById("recordDoneBar");
+    const timer = document.getElementById("recordTimer");
+
+    cameraFeed.style.display = "none";
+    cameraFeed.srcObject = null;
+    playback.style.display = "none";
+    playback.src = "";
+    placeholder.style.display = "block";
+    btnOpen.style.display = "inline-flex";
+    btnRecord.style.display = "none";
+    btnRecord.classList.remove("recording");
+    doneBar.classList.remove("active");
+    timer.classList.remove("active");
+
+    // 直接重新打开摄像头
+    openCamera();
+  }
+
+  // ==================== 收信人列表管理 ====================
+  let recipientCount = 0;
+
+  function addRecipient(name = "", relation = "", background = "") {
+    recipientCount++;
+    const list = document.getElementById("recipientList");
+    const idx = recipientCount;
+    const config = FESTIVAL_CONFIG[currentFestival];
+    
+    // 合并关系和背景
+    const combinedValue = background ? `${relation}, ${background}` : relation;
+
+    const row = document.createElement("div");
+    row.className = "recipient-row";
+    row.id = `recipient-${idx}`;
+    row.innerHTML = `
+      <span class="row-num">${list.children.length + 1}</span>
+      <div class="field">
+        <label>姓名</label>
+        <input type="text" class="r-name" placeholder="${config.namePlaceholder}" maxlength="20" value="${escapeHtml(name)}">
+      </div>
+      <div class="field">
+        <label>关系与背景</label>
+        <input type="text" class="r-relation-bg" placeholder="${config.relationPlaceholder}" maxlength="80" value="${escapeHtml(combinedValue)}">
+      </div>
+      <button class="btn-remove" onclick="removeRecipient('recipient-${idx}')" title="删除">✕</button>
+    `;
+    list.appendChild(row);
+    updateRowNumbers();
+  }
+
+  function removeRecipient(id) {
+    const list = document.getElementById("recipientList");
+    if (list.children.length <= 1) {
+      return; // 至少保留一行
+    }
+    const row = document.getElementById(id);
+    if (row) {
+      row.remove();
+      updateRowNumbers();
+    }
+  }
+
+  function updateRowNumbers() {
+    const rows = document.querySelectorAll(".recipient-row");
+    rows.forEach((row, i) => {
+      const num = row.querySelector(".row-num");
+      if (num) num.textContent = i + 1;
+    });
+  }
+
+  function getRecipients() {
+    const rows = document.querySelectorAll(".recipient-row");
+    const recipients = [];
+    rows.forEach((row) => {
+      const name = row.querySelector(".r-name").value.trim();
+      const relationBg = row.querySelector(".r-relation-bg").value.trim();
+      
+      if (name && relationBg) {
+        // 尝试分割关系和背景（用逗号、顿号或分号分隔）
+        const parts = relationBg.split(/[,，、；;]/);
+        const relation = parts[0].trim();
+        const background = parts.slice(1).join(',').trim();
+        
+        recipients.push({ name, relation, background });
+      }
+    });
+    return recipients;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ==================== 台词预览相关状态 ====================
+  let previewData = null;       // 预览数据（从服务器返回）
+  let countdownTimer = null;    // 倒计时定时器
+  let countdownRemaining = 0;   // 剩余秒数
+  let countdownTotal = 0;       // 总秒数
+  let countdownPaused = false;  // 是否暂停（用户编辑时）
+
+  // ==================== 提交生成（改为先预览台词） ====================
+  async function handleSubmit() {
+    const senderName = document.getElementById("senderNameInput").value.trim();
+    const btn = document.getElementById("submitBtn");
+
+    // 验证
+    if (!senderName) {
+      alert("请输入您的名字");
+      return;
+    }
+    if (!selectedVideoFile) {
+      alert("请上传或录制一段祝福视频");
+      return;
+    }
+    const recipients = getRecipients();
+    if (recipients.length === 0) {
+      alert("请至少添加一个有效的祝福对象（名字和关系不能为空）");
+      return;
+    }
+
+    // 构造表单数据
+    const formData = new FormData();
+    formData.append("senderName", senderName);
+    formData.append("video", selectedVideoFile);
+    formData.append("recipients", JSON.stringify(recipients));
+    formData.append("festival", currentFestival);
+
+    // 禁用按钮，显示加载状态
+    btn.disabled = true;
+    document.getElementById("submitBtnText").textContent = "⏳ 正在生成台词预览...";
+
+    try {
+      const res = await fetch("/api/batch-preview", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "请求失败");
+      }
+
+      // 保存预览数据
+      previewData = data;
+      currentBatchId = data.batchId;
+
+      // 切换到预览视图
+      document.getElementById("formSection").style.display = "none";
+      showPreview(data);
+    } catch (err) {
+      alert("台词生成失败：" + err.message);
+    } finally {
+      btn.disabled = false;
+      const config = FESTIVAL_CONFIG[currentFestival];
+      document.getElementById("submitBtnText").textContent = config.submitText;
+    }
+  }
+
+  // ==================== 台词预览界面 ====================
+  function showPreview(data) {
+    const section = document.getElementById("previewSection");
+    section.classList.add("active");
+
+    // 渲染预览卡片
+    const container = document.getElementById("previewItems");
+    container.innerHTML = data.items.map((item, i) => {
+      const blessingTags = item.narration.blessings.map((b, bi) =>
+        `<input type="text" class="preview-blessing-tag" data-idx="${i}" data-bidx="${bi}" value="${escapeHtml(b)}" onfocus="pauseCountdown()" onblur="resumeCountdown()">`
+      ).join("");
+
+      return `
+        <div class="preview-card" id="preview-card-${i}">
+          <div class="preview-card-header">
+            <div class="preview-avatar">${i + 1}</div>
+            <div>
+              <div class="preview-name">致 ${escapeHtml(item.recipientName)}</div>
+              <div class="preview-relation">${escapeHtml(item.relation)}${item.background ? ' · ' + escapeHtml(item.background) : ''}</div>
+            </div>
+            <div class="preview-theme-badge">🎨 ${escapeHtml(item.narration.themeName)}</div>
+          </div>
+
+          <div class="preview-field">
+            <div class="preview-field-label">🏮 开场标题</div>
+            <input type="text" class="preview-field-value" data-idx="${i}" data-field="openingText" value="${escapeHtml(item.narration.openingText)}" onfocus="pauseCountdown()" onblur="resumeCountdown()">
+          </div>
+
+          <div class="preview-field">
+            <div class="preview-field-label">🎤 开场语音文案</div>
+            <textarea class="preview-field-value" data-idx="${i}" data-field="ttsOpeningText" rows="2" onfocus="pauseCountdown()" onblur="resumeCountdown()">${escapeHtml(item.narration.ttsOpeningText)}</textarea>
+          </div>
+
+          <div class="preview-field">
+            <div class="preview-field-label">✨ 祝福短语（画面展示）</div>
+            <div class="preview-blessings-row">
+              ${blessingTags}
+            </div>
+          </div>
+
+          <div class="preview-field">
+            <div class="preview-field-label">💬 主体祝福语音文案</div>
+            <textarea class="preview-field-value" data-idx="${i}" data-field="ttsBlessingText" rows="3" onfocus="pauseCountdown()" onblur="resumeCountdown()">${escapeHtml(item.narration.ttsBlessingText)}</textarea>
+          </div>
+
+          <div class="preview-field">
+            <div class="preview-field-label">😊 语音开心程度</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <input type="range" class="preview-joyful-slider" data-idx="${i}" min="0" max="5" step="1" value="${item.narration.joyful ?? 3}" oninput="this.nextElementSibling.textContent=['😐','🙂','😊','😄','😆','🤩'][this.value]+' '+this.value" onfocus="pauseCountdown()" onblur="resumeCountdown()" style="flex:1;accent-color:var(--primary);height:6px;">
+              <span style="font-size:14px;min-width:36px;text-align:center;">${['😐','🙂','😊','😄','😆','🤩'][item.narration.joyful ?? 3]} ${item.narration.joyful ?? 3}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // 启动倒计时：5秒 × 人数，最多15秒
+    countdownTotal = Math.min(data.items.length * 5, 15);
+    countdownRemaining = countdownTotal;
+    countdownPaused = false;
+    startCountdown();
+  }
+
+  function startCountdown() {
+    updateCountdownUI();
+    if (countdownTimer) clearInterval(countdownTimer);
+    countdownTimer = setInterval(() => {
+      if (countdownPaused) return;
+      countdownRemaining -= 0.1;
+      if (countdownRemaining <= 0) {
+        countdownRemaining = 0;
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+        updateCountdownUI();
+        // 自动确认
+        confirmAndRender();
+        return;
+      }
+      updateCountdownUI();
+    }, 100);
+  }
+
+  function updateCountdownUI() {
+    const fill = document.getElementById("countdownFill");
+    const num = document.getElementById("countdownNum");
+    const pct = countdownTotal > 0 ? (countdownRemaining / countdownTotal) * 100 : 0;
+    fill.style.width = pct + "%";
+    num.textContent = Math.ceil(countdownRemaining);
+  }
+
+  function pauseCountdown() {
+    countdownPaused = true;
+    const countdownText = document.querySelector(".preview-countdown .countdown-text");
+    if (countdownText) {
+      countdownText.innerHTML = `<span style="color: var(--primary);">⏸ 编辑中 — 倒计时已暂停</span>`;
+    }
+  }
+
+  function resumeCountdown() {
+    // 延迟一点恢复，避免切换焦点时闪烁
+    setTimeout(() => {
+      // 如果还有其他输入框在聚焦，不恢复
+      const active = document.activeElement;
+      if (active && (active.classList.contains("preview-field-value") || active.classList.contains("preview-blessing-tag"))) {
+        return;
+      }
+      countdownPaused = false;
+      const countdownText = document.querySelector(".preview-countdown .countdown-text");
+      if (countdownText) {
+        countdownText.innerHTML = `<span class="countdown-num" id="countdownNum">${Math.ceil(countdownRemaining)}</span> 秒后自动开始制作视频`;
+      }
+      updateCountdownUI();
+    }, 200);
+  }
+
+  function stopCountdown() {
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+    countdownPaused = false;
+  }
+
+  // ==================== 返回表单 ====================
+  function backToForm() {
+    stopCountdown();
+    document.getElementById("previewSection").classList.remove("active");
+    document.getElementById("formSection").style.display = "block";
+    previewData = null;
+    currentBatchId = null;
+  }
+
+  // ==================== 确认台词并开始渲染 ====================
+  let isConfirming = false; // 防止重复提交
+  async function confirmAndRender() {
+    stopCountdown();
+
+    if (!previewData || !currentBatchId || isConfirming) return;
+    isConfirming = true;
+
+    const btnConfirm = document.getElementById("btnConfirm");
+    btnConfirm.disabled = true;
+    btnConfirm.textContent = "⏳ 正在启动视频制作...";
+
+    // 收集用户可能编辑过的台词
+    const narrations = previewData.items.map((item, i) => {
+      const card = document.getElementById(`preview-card-${i}`);
+      if (!card) return { index: i };
+
+      const openingText = card.querySelector('[data-field="openingText"]')?.value || item.narration.openingText;
+      const ttsOpeningText = card.querySelector('[data-field="ttsOpeningText"]')?.value || item.narration.ttsOpeningText;
+      const ttsBlessingText = card.querySelector('[data-field="ttsBlessingText"]')?.value || item.narration.ttsBlessingText;
+
+      // 收集祝福短语
+      const blessingInputs = card.querySelectorAll('.preview-blessing-tag');
+      const blessings = Array.from(blessingInputs).map(input => input.value.trim()).filter(Boolean);
+
+      // 收集开心程度
+      const joyfulSlider = card.querySelector('.preview-joyful-slider');
+      const joyful = joyfulSlider ? parseInt(joyfulSlider.value, 10) : (item.narration.joyful ?? 3);
+
+      return {
+        index: i,
+        openingText,
+        ttsOpeningText,
+        ttsBlessingText,
+        blessings: blessings.length > 0 ? blessings : item.narration.blessings,
+        joyful,
+      };
+    });
+
+    try {
+      const res = await fetch("/api/batch-confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ batchId: currentBatchId, narrations }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "确认失败");
+      }
+
+      // 切换到进度视图
+      document.getElementById("previewSection").classList.remove("active");
+      const progressSection = document.getElementById("progressSection");
+      progressSection.classList.add("active");
+
+      const recipients = previewData.items.map(item => ({
+        name: item.recipientName,
+        relation: item.relation,
+        background: item.background,
+      }));
+
+      document.getElementById("progressTitle").textContent = "🎬 正在制作祝福视频...";
+      document.getElementById("progressSub").textContent =
+        `共 ${recipients.length} 个视频，AI 语音克隆 + 视频渲染，每个约 1-2 分钟`;
+
+      renderProgressItems(recipients);
+      startPolling();
+    } catch (err) {
+      isConfirming = false;
+      alert("启动渲染失败：" + err.message);
+      btnConfirm.disabled = false;
+      btnConfirm.textContent = "✨ 确认台词，开始制作";
+    }
+  }
+
+  // ==================== 进度追踪 ====================
+  function renderProgressItems(recipients) {
+    const container = document.getElementById("progressItems");
+    container.innerHTML = recipients.map((r, i) => {
+      const detail = r.background ? `${escapeHtml(r.relation)} · ${escapeHtml(r.background)}` : escapeHtml(r.relation);
+      return `
+        <div class="progress-item" id="progress-item-${i}">
+          <div class="status-icon pending" id="progress-icon-${i}">⏳</div>
+          <div class="item-info">
+            <div class="item-name">${escapeHtml(r.name)}</div>
+            <div class="item-detail">${detail}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function startPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(pollStatus, 2000);
+    // 立即查一次
+    pollStatus();
+  }
+
+  async function pollStatus() {
+    if (!currentBatchId) return;
+
+    try {
+      const res = await fetch(`/api/batch-status/${currentBatchId}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("轮询失败:", data.error);
+        return;
+      }
+
+      // 更新进度条
+      const percent = data.total > 0 ? (data.completed / data.total) * 100 : 0;
+      document.getElementById("progressBar").style.width = percent + "%";
+
+      // 更新每一项的状态
+      data.items.forEach((item) => {
+        const icon = document.getElementById(`progress-icon-${item.index}`);
+        if (!icon) return;
+
+        // 移除旧状态
+        icon.classList.remove("pending", "processing", "done", "error");
+
+        switch (item.status) {
+          case "pending":
+            icon.classList.add("pending");
+            icon.textContent = "⏳";
+            break;
+          case "processing":
+            icon.classList.add("processing");
+            icon.textContent = "⚙️";
+            break;
+          case "done":
+            icon.classList.add("done");
+            icon.textContent = "✅";
+            break;
+          case "error":
+            icon.classList.add("error");
+            icon.textContent = "❌";
+            break;
+        }
+      });
+
+      // 检查是否全部完成
+      if (data.status === "done" || data.status === "error") {
+        clearInterval(pollTimer);
+        pollTimer = null;
+
+        // 延迟切换到结果页面
+        setTimeout(() => {
+          showResults(data);
+        }, 800);
+      }
+    } catch (e) {
+      console.error("轮询异常:", e);
+    }
+  }
+
+  // ==================== 结果展示 ====================
+  function showResults(data) {
+    document.getElementById("progressSection").classList.remove("active");
+    const resultSection = document.getElementById("resultSection");
+    resultSection.classList.add("active");
+
+    const doneCount = data.items.filter((i) => i.status === "done").length;
+    const errorCount = data.items.filter((i) => i.status === "error").length;
+
+    let summary = `成功生成 ${doneCount} 个视频`;
+    if (errorCount > 0) summary += `，${errorCount} 个失败`;
+    document.getElementById("resultSummary").textContent = summary;
+
+    // 如果没有成功的视频，隐藏打包按钮
+    document.getElementById("downloadAllBtn").style.display =
+      doneCount > 0 ? "inline-flex" : "none";
+
+    // 渲染结果列表
+    const container = document.getElementById("resultItems");
+    container.innerHTML = data.items
+      .map((item) => {
+        if (item.status === "done" && item.videoUrl) {
+          return `
+            <div class="result-item">
+              <video src="${item.videoUrl}" controls playsinline preload="metadata"></video>
+              <div class="result-info">
+                <div class="result-name">致 ${escapeHtml(item.recipientName)}</div>
+                <div class="result-relation">${escapeHtml(item.relation)}${item.themeName ? ` · 🎨 ${item.themeName}` : ''}</div>
+                <a class="btn-download-single" href="${item.videoUrl}" download="${item.filename || ''}">
+                  📥 下载视频
+                </a>
+              </div>
+            </div>
+          `;
+        } else if (item.status === "error") {
+          return `
+            <div class="result-item" style="opacity: 0.6;">
+              <div style="width:140px;aspect-ratio:9/16;background:rgba(255,60,60,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;">❌</div>
+              <div class="result-info">
+                <div class="result-name">致 ${escapeHtml(item.recipientName)}</div>
+                <div class="result-relation">${escapeHtml(item.relation)}${item.themeName ? ` · 🎨 ${item.themeName}` : ''}</div>
+                <div class="result-status-error">生成失败: ${escapeHtml(item.error || "未知错误")}</div>
+              </div>
+            </div>
+          `;
+        }
+        return "";
+      })
+      .join("");
+  }
+
+  // ==================== 打包下载 ====================
+  function downloadAll() {
+    if (!currentBatchId) return;
+    window.location.href = `/api/batch-download/${currentBatchId}`;
+  }
+
+  // ==================== 重置 ====================
+  function resetForm() {
+    currentBatchId = null;
+    previewData = null;
+    isConfirming = false;
+    stopCountdown();
+    if (pollTimer) {
+      clearInterval(pollTimer);
+      pollTimer = null;
+    }
+
+    document.getElementById("formSection").style.display = "block";
+    document.getElementById("previewSection").classList.remove("active");
+    document.getElementById("progressSection").classList.remove("active");
+    document.getElementById("resultSection").classList.remove("active");
+    document.getElementById("submitBtn").disabled = false;
+
+    // 重置表单
+    document.getElementById("senderNameInput").value = "";
+    selectedVideoFile = null;
+
+    // 重置上传区域
+    const area = document.getElementById("uploadArea");
+    area.classList.remove("has-file");
+    area.innerHTML = `
+      <div class="upload-icon">🎥</div>
+      <div class="upload-text">点击上传或拖拽视频到此处</div>
+      <div class="upload-hint">支持 MP4 格式，3-10秒，最大 50MB · 视频中请包含你的说话声音</div>
+      <input type="file" id="videoInput" accept="video/mp4,video/*">
+    `;
+    setupUpload();
+
+    // 重置录制区域
+    stopCamera();
+    recordedChunks = [];
+    const cameraFeed = document.getElementById("cameraFeed");
+    const playback = document.getElementById("recordPlayback");
+    const placeholder = document.getElementById("recordPlaceholder");
+    const btnOpen = document.getElementById("btnOpenCamera");
+    const btnRecord = document.getElementById("btnRecord");
+    const doneBar = document.getElementById("recordDoneBar");
+    const timer = document.getElementById("recordTimer");
+    cameraFeed.style.display = "none";
+    cameraFeed.srcObject = null;
+    playback.style.display = "none";
+    playback.src = "";
+    placeholder.style.display = "block";
+    btnOpen.style.display = "inline-flex";
+    btnRecord.style.display = "none";
+    btnRecord.classList.remove("recording");
+    doneBar.classList.remove("active");
+    timer.classList.remove("active");
+
+    // 切回上传模式
+    switchVideoMode("upload");
+
+    // 重置收信人列表
+    document.getElementById("recipientList").innerHTML = "";
+    recipientCount = 0;
+    addRecipient();
+    addRecipient();
+    addRecipient();
+  }
+
+  // ==================== 启动 ====================
+  init();
+</script>
+</body>
+</html>
