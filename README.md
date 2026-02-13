@@ -3,7 +3,7 @@
 一键为多人生成个性化节日祝福视频，支持 AI 语音克隆和智能文案生成。
 
 ## Demo Link
-https://spring-festival-video-20002534016.asia-southeast1.run.app/
+https://minv.io/
 
 ## ✨ 功能特性
 
