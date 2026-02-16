@@ -1,5 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
-import { type ThemeType } from "../themes";
+import { getTheme, type ThemeType } from "../themes";
+import { FPS } from "../constants";
 
 // Scene 1: 开场 — 心形烟花 + 语音条 + 底部文字逐字出现
 
@@ -23,66 +24,6 @@ function heartY(t: number): number {
     Math.cos(4 * t)
   );
 }
-
-// ============= 主题相关的烟花配色 =============
-const THEME_FIREWORK_COLORS: Record<ThemeType, string[]> = {
-  // 传统红金：金色、红色、橙色、暖白
-  traditional: [
-    "#ffd700", "#ffaa00", "#ff6b3d", "#ff4444", "#ff8c00",
-    "#ffcc33", "#ff5533", "#ffe066", "#ff9966", "#fff5cc",
-  ],
-  // 现代科技：青蓝、电蓝、紫色、冰蓝
-  modern: [
-    "#00d9ff", "#00b4ff", "#6366f1", "#a855f7", "#38bdf8",
-    "#818cf8", "#c084fc", "#22d3ee", "#67e8f9", "#e0f2fe",
-  ],
-  // 粉色温馨：粉红、桃红、薰衣草、浅紫
-  cute: [
-    "#ff69b4", "#ff85c8", "#da70d6", "#ee82ee", "#ff1493",
-    "#c084fc", "#f0abfc", "#ffb6c1", "#e879f9", "#f472b6",
-  ],
-  // 墨绿优雅：翠绿、薄荷、金绿、浅碧
-  elegant: [
-    "#a3d9a5", "#7bc96f", "#4ade80", "#86efac", "#6ee7b7",
-    "#a7f3d0", "#34d399", "#bef264", "#d9f99d", "#fde68a",
-  ],
-};
-
-// 主题相关的暗色背景（开场专用深色调）
-const THEME_SCENE_BG: Record<ThemeType, string> = {
-  traditional:
-    "radial-gradient(ellipse at 50% 40%, #2a0a08 0%, #1a0500 35%, #0a0200 65%, #000000 100%)",
-  modern:
-    "radial-gradient(ellipse at 50% 40%, #0f1035 0%, #080a1e 35%, #030412 65%, #000000 100%)",
-  cute:
-    "radial-gradient(ellipse at 50% 40%, #1a0a20 0%, #0d0510 35%, #050208 65%, #000000 100%)",
-  elegant:
-    "radial-gradient(ellipse at 50% 40%, #0a1a10 0%, #050f08 35%, #020804 65%, #000000 100%)",
-};
-
-// 主题文字颜色（底部文字）
-const THEME_TEXT_COLOR: Record<ThemeType, string> = {
-  traditional: "#ffe4b5", // 暖金奶油
-  modern: "#c7e0f4",      // 冰蓝白
-  cute: "#ddc998",         // 金粉
-  elegant: "#d4e8d0",      // 淡绿奶白
-};
-
-// 主题文字光晕色
-const THEME_TEXT_GLOW: Record<ThemeType, string> = {
-  traditional: "rgba(255,215,0,0.4)",
-  modern: "rgba(0,217,255,0.35)",
-  cute: "rgba(221,201,152,0.4)",
-  elegant: "rgba(163,217,165,0.35)",
-};
-
-// 语音条强调色（进度条已播放部分）
-const THEME_BAR_ACCENT: Record<ThemeType, string> = {
-  traditional: "#c4a050",
-  modern: "#5b8fb9",
-  cute: "#c4a86c",
-  elegant: "#7aab7c",
-};
 
 // ============= 3D 心形烟花 =============
 const HeartFirework: React.FC<{
@@ -397,14 +338,6 @@ const CatSilhouette: React.FC<{ flip?: boolean; fillColor: string }> = ({
   </svg>
 );
 
-// 根据背景色调计算猫咪剪影深色
-const THEME_CAT_FILL: Record<ThemeType, string> = {
-  traditional: "#1a0a08",
-  modern: "#0a0c22",
-  cute: "#1a1228",
-  elegant: "#0a1510",
-};
-
 // ============= 导出组件 =============
 export const TextReveal: React.FC<{
   name: string;
@@ -425,17 +358,13 @@ export const TextReveal: React.FC<{
 }) => {
   const frame = useCurrentFrame();
 
-  // 获取当前主题的烟花色、背景、文字色
-  const fireworkColors = THEME_FIREWORK_COLORS[theme] ?? THEME_FIREWORK_COLORS.traditional;
-  const sceneBg = THEME_SCENE_BG[theme] ?? THEME_SCENE_BG.traditional;
-  const textColor = THEME_TEXT_COLOR[theme] ?? THEME_TEXT_COLOR.traditional;
-  const textGlow = THEME_TEXT_GLOW[theme] ?? THEME_TEXT_GLOW.traditional;
-  const barAccent = THEME_BAR_ACCENT[theme] ?? THEME_BAR_ACCENT.traditional;
-  const catFill = THEME_CAT_FILL[theme] ?? THEME_CAT_FILL.cute;
+  // 从统一的 ThemeConfig.scene1 读取所有 Scene 1 配色
+  const themeConfig = getTheme(theme);
+  const { fireworkColors, background: sceneBg, textColor, textGlow, barAccent, catFill } = themeConfig.scene1;
 
   const displayText = speechText || text;
   const chars = displayText.split("");
-  const durationSeconds = Math.round(durationInFrames / 30);
+  const durationSeconds = Math.round(durationInFrames / FPS);
 
   return (
     <AbsoluteFill

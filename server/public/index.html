@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>💝 节日祝福视频批量生成器</title>
+  <title>🧧 春节祝福视频批量生成器</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -51,23 +51,6 @@
       --particle-colors: #ffd700, #ff6b6b, #ffaa00, #ff4444, #fff5b0;
     }
 
-    body.valentine {
-      --bg-gradient: linear-gradient(135deg, #1a0010 0%, #3d0020 30%, #8b1050 60%, #5c0040 100%);
-      --primary: #ff69b4;
-      --primary-dark: #ff1493;
-      --accent-bg: rgba(139, 16, 80, 0.6);
-      --accent-bg-dark: rgba(60, 0, 32, 0.8);
-      --text-main: #fff0f5;
-      --text-secondary: #ffb6c1;
-      --text-label: #ffb6c1;
-      --border-color: rgba(255, 105, 180, 0.2);
-      --border-color-strong: rgba(255, 105, 180, 0.3);
-      --btn-text: #5c0040;
-      --glow-color: rgba(255, 105, 180, 0.3);
-      --glow-color-strong: rgba(255, 105, 180, 0.6);
-      --particle-colors: #ff69b4, #ff1493, #ffb6c1, #ff85c0, #ffd700;
-    }
-
     body {
       font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       background: var(--bg-gradient);
@@ -96,65 +79,6 @@
       max-width: 720px;
       margin: 0 auto;
       padding: 40px 20px 60px;
-    }
-
-    /* ===== 节日切换器 ===== */
-    .festival-switcher {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 28px;
-      animation: fadeInUp 0.6s ease;
-    }
-    .festival-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      padding: 10px 20px;
-      border-radius: 12px;
-      transition: all 0.3s;
-      user-select: none;
-      border: 2px solid transparent;
-      opacity: 0.5;
-    }
-    .festival-option.active {
-      opacity: 1;
-      border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.08);
-    }
-    .festival-option:hover:not(.active) {
-      opacity: 0.75;
-    }
-    .festival-option .festival-emoji {
-      font-size: 28px;
-    }
-    .festival-toggle-track {
-      position: relative;
-      width: 64px;
-      height: 32px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.15);
-      cursor: pointer;
-      transition: background 0.3s;
-      flex-shrink: 0;
-    }
-    .festival-toggle-track .toggle-thumb {
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: var(--primary);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-    .festival-toggle-track.valentine .toggle-thumb {
-      left: 35px;
     }
 
     /* 标题 */
@@ -492,6 +416,133 @@
       color: var(--btn-text);
       margin-left: 6px;
       vertical-align: middle;
+    }
+
+    /* 音频录制（可选） */
+    .audio-record-toggle {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      user-select: none;
+    }
+    .audio-record-toggle:hover { background: rgba(255, 215, 0, 0.06); }
+    .audio-record-toggle.active {
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid var(--border-color-strong);
+    }
+    .audio-record-panel {
+      display: none;
+      margin-top: 14px;
+      animation: fadeInUp 0.3s ease;
+    }
+    .audio-record-panel.active { display: block; }
+    .audio-record-area {
+      border: 2px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.3);
+    }
+    .audio-record-visualizer {
+      position: relative;
+      width: 100%;
+      height: 100px;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .audio-record-visualizer .placeholder-audio {
+      text-align: center;
+      color: rgba(255, 245, 230, 0.4);
+    }
+    .audio-record-visualizer .placeholder-audio .mic-icon { font-size: 36px; margin-bottom: 6px; }
+    .audio-record-visualizer .placeholder-audio p { font-size: 12px; }
+    .audio-wave-bars {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: 100%;
+    }
+    .audio-wave-bars.active { display: flex; }
+    .audio-wave-bar {
+      width: 4px;
+      border-radius: 2px;
+      background: var(--primary);
+      transition: height 0.1s ease;
+      height: 10px;
+    }
+    .audio-timer {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #ff4444;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: none;
+      align-items: center;
+      gap: 5px;
+      font-variant-numeric: tabular-nums;
+    }
+    .audio-timer.active { display: flex; }
+    .audio-record-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 14px;
+    }
+    .btn-audio-record {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 3px solid var(--text-main);
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-audio-record:hover { border-color: var(--primary); }
+    .btn-audio-record .inner-audio {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #ff4444;
+      transition: all 0.25s;
+    }
+    .btn-audio-record.recording .inner-audio {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      background: #ff4444;
+    }
+    .audio-done-bar {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(76, 175, 80, 0.08);
+      border-top: 1px solid rgba(76, 175, 80, 0.2);
+    }
+    .audio-done-bar.active { display: flex; }
+    .audio-done-bar .done-text { font-size: 13px; color: #4caf50; font-weight: 600; }
+    .audio-playback-mini {
+      width: 100%;
+      max-height: 36px;
+      margin-top: 8px;
     }
 
     /* 收信人列表 */
@@ -1085,32 +1136,17 @@
     }
   </style>
 </head>
-<body class="valentine">
+<body>
 
 <div class="bg-particles" id="particles"></div>
 
 <div class="container">
-  <!-- 节日切换 -->
-  <div class="festival-switcher">
-    <div class="festival-option" id="optSpring" onclick="switchFestival('spring')">
-      <span class="festival-emoji">🧧</span>
-      <span>春节</span>
-    </div>
-    <div class="festival-toggle-track valentine" id="festivalToggle" onclick="toggleFestival()">
-      <div class="toggle-thumb"></div>
-    </div>
-    <div class="festival-option active" id="optValentine" onclick="switchFestival('valentine')">
-      <span class="festival-emoji">💝</span>
-      <span>情人节</span>
-    </div>
-  </div>
-
   <!-- 标题 -->
   <div class="header">
-    <div class="lantern" id="headerEmoji">💘</div>
-    <h1 id="headerTitle">情人节表白视频批量生成</h1>
+    <div class="lantern" id="headerEmoji">🏮</div>
+    <h1 id="headerTitle">春节祝福视频批量生成</h1>
     <p id="headerDesc">
-      上传或现场录制极短示例祝福，输入TA的名字，为每个人生成专属情人节视频
+      上传或现场录制极短示例祝福，输入朋友列表，为每个人生成专属祝福视频
     </p>
   </div>
 
@@ -1124,15 +1160,15 @@
       </div>
       <div style="margin-top: 16px;">
         <label id="videoLabel" style="display:block; font-size:13px; color:var(--text-label); margin-bottom:8px; font-weight:500;">
-          提供一段祝福视频（录一句情人节祝福语，3-10秒）
+          提供一段祝福视频（录一句通用的新年祝福语，3-10秒）
         </label>
         <div class="video-tabs">
-          <button class="video-tab active" onclick="switchVideoMode('upload')">📁 上传视频</button>
-          <button class="video-tab" onclick="switchVideoMode('record')">📹 现场录制</button>
+          <button class="video-tab" onclick="window.__app.switchVideoMode('upload')">📁 上传视频</button>
+          <button class="video-tab active" onclick="window.__app.switchVideoMode('record')">📹 现场录制</button>
         </div>
 
         <!-- 上传面板 -->
-        <div class="video-panel active" id="panelUpload">
+        <div class="video-panel" id="panelUpload">
           <div class="upload-area" id="uploadArea" onclick="document.getElementById('videoInput').click()">
             <div class="upload-icon">🎥</div>
             <div class="upload-text">点击上传或拖拽视频到此处</div>
@@ -1142,7 +1178,7 @@
         </div>
 
         <!-- 录制面板 -->
-        <div class="video-panel" id="panelRecord">
+        <div class="video-panel active" id="panelRecord">
           <div class="record-area" id="recordArea">
             <div class="record-preview" id="recordPreview">
               <div class="placeholder" id="recordPlaceholder">
@@ -1157,16 +1193,60 @@
               </div>
             </div>
             <div class="record-controls" id="recordControls">
-              <button class="btn-record-action" id="btnOpenCamera" onclick="openCamera()">🎥 开启摄像头</button>
-              <button class="btn-record" id="btnRecord" onclick="toggleRecording()" style="display:none;" title="开始录制">
+              <button class="btn-record-action" id="btnOpenCamera" onclick="window.__app.openCamera()">🎥 开启摄像头</button>
+              <button class="btn-record" id="btnRecord" onclick="window.__app.toggleRecording()" style="display:none;" title="开始录制">
                 <div class="inner"></div>
               </button>
             </div>
             <div class="record-done-bar" id="recordDoneBar">
               <span class="done-text" id="recordDoneText">✅ 录制完成</span>
-              <button class="btn-record-action" onclick="retakeRecording()">🔄 重新录制</button>
+              <button class="btn-record-action" onclick="window.__app.retakeRecording()">🔄 重新录制</button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 可选：音频录制（用于声音克隆），默认隐藏，由外部逻辑控制显示 -->
+    <div class="card" id="audioRecordCard" style="animation-delay: 0.08s; display: none;">
+      <div class="audio-record-toggle" id="audioToggle" onclick="window.__app.toggleAudioRecord()">
+        <div class="tts-switch">
+          <input type="checkbox" id="audioRecordSwitch">
+          <label class="slider" for="audioRecordSwitch"></label>
+        </div>
+        <div class="tts-info">
+          <div class="tts-title">🎙️ 录制声音样本（可选）<span class="tts-badge">推荐</span></div>
+          <div class="tts-desc">单独录一段你的说话声音，AI 将用它来克隆你的音色生成配音。不录也行，会从视频中自动提取。</div>
+        </div>
+      </div>
+      <div class="audio-record-panel" id="audioRecordPanel">
+        <div class="audio-record-area" id="audioRecordArea">
+          <div class="audio-record-visualizer" id="audioVisualizer">
+            <div class="placeholder-audio" id="audioPlaceholder">
+              <div class="mic-icon">🎙️</div>
+              <p>点击下方按钮开始录音</p>
+            </div>
+            <div class="audio-wave-bars" id="audioWaveBars">
+              <!-- JS will generate bars -->
+            </div>
+            <audio id="audioPlayback" controls style="display:none; width:90%; position:absolute; bottom:8px;"></audio>
+            <div class="audio-timer" id="audioTimer">
+              <span class="rec-dot"></span>
+              <span id="audioTimerText">00:00</span>
+            </div>
+          </div>
+          <div class="audio-record-controls" id="audioRecordControls">
+            <button class="btn-audio-record" id="btnAudioRecord" onclick="window.__app.toggleAudioRecording()" title="开始录音">
+              <div class="inner-audio"></div>
+            </button>
+          </div>
+          <div class="audio-done-bar" id="audioDoneBar">
+            <span class="done-text" id="audioDoneText">✅ 录音完成</span>
+            <button class="btn-record-action" onclick="window.__app.retakeAudioRecording()">🔄 重新录音</button>
+          </div>
+        </div>
+        <div style="font-size: 11px; color: var(--text-label); opacity: 0.5; margin-top: 8px; line-height: 1.5; text-align: center;">
+          💡 建议录制 5-15 秒，随便说几句话就行。声音越清晰，克隆效果越好。
         </div>
       </div>
     </div>
@@ -1180,17 +1260,17 @@
       <div class="recipient-list" id="recipientList">
         <!-- JS 动态生成 -->
       </div>
-      <button class="btn-add" onclick="addRecipient()">+ 添加一位祝福对象</button>
+      <button class="btn-add" onclick="window.__app.addRecipient()">+ 添加一位祝福对象</button>
       <div class="recipient-hint" id="recipientHint">
         💡 在「关系与背景」中填写关系和背景信息，用逗号分隔<br>
-        💡 例如：女朋友，异地恋 / 闺蜜，刚分手 / 老婆，结婚纪念日<br>
-        💝 AI 会根据关系自动选择最匹配的视频风格
+        💡 例如：发小，刚升职 / 妈妈，身体健康 / 领导，事业巅峰<br>
+        🎨 AI 会根据对方身份自动选择最匹配的视频风格
       </div>
     </div>
 
     <!-- 提交 -->
-    <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
-      <span id="submitBtnText">💝 一键生成全部祝福视频</span>
+    <button class="submit-btn" id="submitBtn" onclick="window.__app.handleSubmit()">
+      <span id="submitBtnText">🧧 一键生成全部祝福视频</span>
     </button>
   </div>
 
@@ -1213,8 +1293,8 @@
         <!-- JS 动态生成 -->
       </div>
       <div class="preview-actions">
-        <button class="btn-back" onclick="backToForm()">← 返回修改</button>
-        <button class="btn-confirm" id="btnConfirm" onclick="confirmAndRender()">
+        <button class="btn-back" onclick="window.__app.backToForm()">← 返回修改</button>
+        <button class="btn-confirm" id="btnConfirm" onclick="window.__app.confirmAndRender()">
           ✨ 确认台词，开始制作
         </button>
       </div>
@@ -1247,8 +1327,8 @@
       <p id="resultSummary"></p>
     </div>
     <div class="result-actions-top">
-      <button class="btn-primary" id="downloadAllBtn" onclick="downloadAll()">📦 打包下载全部</button>
-      <button class="btn-secondary" onclick="resetForm()">🔄 再做一批</button>
+      <button class="btn-primary" id="downloadAllBtn" onclick="window.__app.downloadAll()">📦 打包下载全部</button>
+      <button class="btn-secondary" onclick="window.__app.resetForm()">🔄 再做一批</button>
     </div>
     <div class="result-items" id="resultItems">
       <!-- JS 动态生成 -->
@@ -1256,952 +1336,10 @@
   </div>
 
   <div class="footer" id="pageFooter">
-    💝 2026 · Happy Valentine's Day 💝
+    🧧 2026 丙午马年 · 新春快乐 🧧
   </div>
 </div>
 
-<script>
-  // ==================== 状态 ====================
-  let selectedVideoFile = null;
-  let currentBatchId = null;
-  let pollTimer = null;
-  let currentFestival = "valentine"; // "spring" | "valentine"
-
-  // 录制相关状态
-  let cameraStream = null;
-  let mediaRecorder = null;
-  let recordedChunks = [];
-  let recordStartTime = null;
-  let recordTimerInterval = null;
-  let currentVideoMode = "upload"; // "upload" | "record"
-
-  // ==================== 节日配置 ====================
-  const FESTIVAL_CONFIG = {
-    spring: {
-      emoji: "🏮",
-      title: "春节祝福视频批量生成",
-      desc: "上传或现场录制极短示例祝福，输入朋友列表，为每个人生成专属祝福视频",
-      videoLabel: "提供一段祝福视频（录一句通用的新年祝福语，3-10秒）",
-      submitText: "🧧 一键生成全部祝福视频",
-      footer: "🧧 2026 丙午马年 · 新春快乐 🧧",
-      particleColors: ["#ffd700", "#ff6b6b", "#ffaa00", "#ff4444", "#fff5b0"],
-      recipientHint: `💡 在「关系与背景」中填写关系和背景信息，用逗号分隔<br>💡 例如：发小，刚升职 / 妈妈，身体健康 / 领导，事业巅峰<br>🎨 AI 会根据对方身份自动选择最匹配的视频风格`,
-      namePlaceholder: "张三",
-      relationPlaceholder: "发小，事业巅峰",
-    },
-    valentine: {
-      emoji: "💘",
-      title: "情人节表白视频批量生成",
-      desc: "上传或现场录制极短示例祝福，输入TA的名字，为每个人生成专属情人节视频",
-      videoLabel: "提供一段表白视频（录一句情人节表白语，3-10秒）",
-      submitText: "💝 一键生成全部表白视频",
-      footer: "💝 2026 · Happy Valentine's Day 💝",
-      particleColors: ["#ff69b4", "#ff1493", "#ffb6c1", "#ff85c0", "#ffd700"],
-      recipientHint: `💡 在「关系与背景」中填写关系和背景信息，用逗号分隔<br>💡 例如：女朋友，异地恋 / 闺蜜，刚分手 / 老婆，结婚纪念日<br>💝 AI 会根据关系自动选择最匹配的视频风格`,
-      namePlaceholder: "小美",
-      relationPlaceholder: "女朋友，异地恋",
-    },
-  };
-
-  // ==================== 节日切换 ====================
-  function switchFestival(festival) {
-    if (festival === currentFestival) return;
-    currentFestival = festival;
-
-    const config = FESTIVAL_CONFIG[festival];
-
-    // 切换 body class
-    document.body.classList.toggle("valentine", festival === "valentine");
-
-    // 更新 toggle
-    document.getElementById("festivalToggle").classList.toggle("valentine", festival === "valentine");
-    document.getElementById("optSpring").classList.toggle("active", festival === "spring");
-    document.getElementById("optValentine").classList.toggle("active", festival === "valentine");
-
-    // 更新文案
-    document.getElementById("headerEmoji").textContent = config.emoji;
-    document.getElementById("headerTitle").textContent = config.title;
-    document.getElementById("headerDesc").textContent = config.desc;
-    document.getElementById("videoLabel").textContent = config.videoLabel;
-    document.getElementById("submitBtnText").textContent = config.submitText;
-    document.getElementById("pageFooter").textContent = config.footer;
-
-    // 更新收信人提示
-    const hint = document.getElementById("recipientHint");
-    if (hint) hint.innerHTML = config.recipientHint;
-
-    // 更新 placeholder
-    document.querySelectorAll(".r-name").forEach(el => {
-      el.placeholder = config.namePlaceholder;
-    });
-    document.querySelectorAll(".r-relation-bg").forEach(el => {
-      el.placeholder = config.relationPlaceholder;
-    });
-
-    // 重新生成粒子
-    recreateParticles();
-  }
-
-  function toggleFestival() {
-    switchFestival(currentFestival === "spring" ? "valentine" : "spring");
-  }
-
-  // ==================== 初始化 ====================
-  async function init() {
-    createParticles();
-    setupUpload();
-    // 默认添加 3 个空行
-    addRecipient();
-    addRecipient();
-    addRecipient();
-  }
-
-  // ==================== 背景粒子 ====================
-  function createParticles() {
-    const container = document.getElementById("particles");
-    const config = FESTIVAL_CONFIG[currentFestival];
-    const colors = config.particleColors;
-    for (let i = 0; i < 25; i++) {
-      const p = document.createElement("div");
-      p.className = "particle";
-      const size = 3 + Math.random() * 6;
-      p.style.cssText = `
-        width: ${size}px; height: ${size}px;
-        left: ${Math.random() * 100}%;
-        top: ${Math.random() * 100}%;
-        background: ${colors[i % colors.length]};
-        opacity: ${0.15 + Math.random() * 0.2};
-        animation-delay: ${Math.random() * 6}s;
-        animation-duration: ${4 + Math.random() * 4}s;
-      `;
-      container.appendChild(p);
-    }
-  }
-
-  function recreateParticles() {
-    const container = document.getElementById("particles");
-    container.innerHTML = "";
-    createParticles();
-  }
-
-  // ==================== 视频上传 ====================
-  function setupUpload() {
-    const area = document.getElementById("uploadArea");
-    const input = document.getElementById("videoInput");
-
-    area.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      area.style.borderColor = "rgba(255, 215, 0, 0.8)";
-    });
-    area.addEventListener("dragleave", () => {
-      area.style.borderColor = "";
-    });
-    area.addEventListener("drop", (e) => {
-      e.preventDefault();
-      area.style.borderColor = "";
-      if (e.dataTransfer.files[0]) {
-        input.files = e.dataTransfer.files;
-        handleFileSelect(e.dataTransfer.files[0]);
-      }
-    });
-    input.addEventListener("change", () => {
-      if (input.files[0]) handleFileSelect(input.files[0]);
-    });
-  }
-
-  function handleFileSelect(file) {
-    const area = document.getElementById("uploadArea");
-    area.classList.add("has-file");
-    selectedVideoFile = file;
-
-    const video = document.createElement("video");
-    video.preload = "metadata";
-    video.onloadedmetadata = () => {
-      URL.revokeObjectURL(video.src);
-      const duration = video.duration;
-      if (duration < 2 || duration > 30) {
-        selectedVideoFile = null;
-        area.innerHTML = `
-          <div class="upload-icon">⚠️</div>
-          <div class="upload-text" style="color: #ff6b6b;">视频时长 ${duration.toFixed(1)}秒，建议3-10秒</div>
-          <div class="upload-hint">点击重新选择</div>
-          <input type="file" id="videoInput" accept="video/mp4,video/*">
-        `;
-        area.classList.remove("has-file");
-        setupUpload();
-        return;
-      }
-      area.innerHTML = `
-        <div class="upload-icon">✅</div>
-        <div class="upload-text">视频已选择</div>
-        <div class="file-name">${file.name} (${duration.toFixed(1)}秒, ${(file.size / 1024 / 1024).toFixed(1)}MB)</div>
-        <video src="${URL.createObjectURL(file)}" muted loop autoplay playsinline></video>
-        <div class="upload-hint" style="margin-top: 8px;">点击更换视频</div>
-        <input type="file" id="videoInput" accept="video/mp4,video/*">
-      `;
-      setupUpload();
-    };
-    video.src = URL.createObjectURL(file);
-  }
-
-  // ==================== 视频模式切换 ====================
-  function switchVideoMode(mode) {
-    currentVideoMode = mode;
-    // 更新 tab 样式
-    document.querySelectorAll(".video-tab").forEach((tab, i) => {
-      tab.classList.toggle("active", (i === 0 && mode === "upload") || (i === 1 && mode === "record"));
-    });
-    document.getElementById("panelUpload").classList.toggle("active", mode === "upload");
-    document.getElementById("panelRecord").classList.toggle("active", mode === "record");
-
-    // 切到上传时关闭摄像头
-    if (mode === "upload") {
-      stopCamera();
-    }
-  }
-
-  // ==================== 摄像头 & 录制 ====================
-  async function openCamera() {
-    try {
-      // 优先请求前置摄像头
-      cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 1080 }, height: { ideal: 1920 } },
-        audio: true,
-      });
-
-      const cameraFeed = document.getElementById("cameraFeed");
-      const playback = document.getElementById("recordPlayback");
-      const placeholder = document.getElementById("recordPlaceholder");
-      const btnOpen = document.getElementById("btnOpenCamera");
-      const btnRecord = document.getElementById("btnRecord");
-
-      cameraFeed.srcObject = cameraStream;
-      cameraFeed.style.display = "block";
-      playback.style.display = "none";
-      placeholder.style.display = "none";
-      btnOpen.style.display = "none";
-      btnRecord.style.display = "flex";
-
-      // 如果之前有录制结果，清除
-      document.getElementById("recordDoneBar").classList.remove("active");
-    } catch (err) {
-      console.error("摄像头访问失败:", err);
-      if (err.name === "NotAllowedError") {
-        alert("请允许访问摄像头和麦克风权限后重试");
-      } else if (err.name === "NotFoundError") {
-        alert("未检测到摄像头设备");
-      } else {
-        alert("摄像头开启失败: " + err.message);
-      }
-    }
-  }
-
-  function stopCamera() {
-    if (cameraStream) {
-      cameraStream.getTracks().forEach((t) => t.stop());
-      cameraStream = null;
-    }
-    if (mediaRecorder && mediaRecorder.state !== "inactive") {
-      mediaRecorder.stop();
-      mediaRecorder = null;
-    }
-    clearInterval(recordTimerInterval);
-    recordTimerInterval = null;
-  }
-
-  function toggleRecording() {
-    if (!mediaRecorder || mediaRecorder.state === "inactive") {
-      startRecording();
-    } else {
-      stopRecording();
-    }
-  }
-
-  function startRecording() {
-    if (!cameraStream) return;
-
-    recordedChunks = [];
-
-    // 选择支持的 MIME 类型
-    const mimeOptions = [
-      "video/webm;codecs=vp9,opus",
-      "video/webm;codecs=vp8,opus",
-      "video/webm",
-      "video/mp4",
-    ];
-    let mimeType = "";
-    for (const m of mimeOptions) {
-      if (MediaRecorder.isTypeSupported(m)) { mimeType = m; break; }
-    }
-
-    mediaRecorder = new MediaRecorder(cameraStream, mimeType ? { mimeType } : {});
-
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) recordedChunks.push(e.data);
-    };
-
-    mediaRecorder.onstop = () => {
-      onRecordingStopped();
-    };
-
-    mediaRecorder.start(100); // 每 100ms 收集一次数据
-
-    // UI：红色录制状态
-    const btnRecord = document.getElementById("btnRecord");
-    btnRecord.classList.add("recording");
-    btnRecord.title = "停止录制";
-
-    // 启动计时器
-    recordStartTime = Date.now();
-    const timer = document.getElementById("recordTimer");
-    timer.classList.add("active");
-    updateRecordTimer();
-    recordTimerInterval = setInterval(updateRecordTimer, 200);
-
-    // 自动在 15 秒后停止（安全上限）
-    setTimeout(() => {
-      if (mediaRecorder && mediaRecorder.state === "recording") {
-        stopRecording();
-      }
-    }, 15000);
-  }
-
-  function stopRecording() {
-    if (mediaRecorder && mediaRecorder.state === "recording") {
-      mediaRecorder.stop();
-    }
-    clearInterval(recordTimerInterval);
-    recordTimerInterval = null;
-
-    // 停止计时器动画
-    document.getElementById("recordTimer").classList.remove("active");
-    document.getElementById("btnRecord").classList.remove("recording");
-    document.getElementById("btnRecord").title = "开始录制";
-  }
-
-  function updateRecordTimer() {
-    const elapsed = (Date.now() - recordStartTime) / 1000;
-    const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
-    const secs = String(Math.floor(elapsed % 60)).padStart(2, "0");
-    document.getElementById("recordTimerText").textContent = `${mins}:${secs}`;
-  }
-
-  function onRecordingStopped() {
-    // 停止摄像头
-    stopCamera();
-
-    const blob = new Blob(recordedChunks, { type: recordedChunks[0]?.type || "video/webm" });
-    const duration = ((Date.now() - recordStartTime) / 1000).toFixed(1);
-
-    // 检查时长
-    if (parseFloat(duration) < 2) {
-      alert("录制太短啦，请至少录 3 秒");
-      retakeRecording();
-      return;
-    }
-
-    // 将 blob 转为 File
-    const ext = blob.type.includes("mp4") ? "mp4" : "webm";
-    const file = new File([blob], `recording_${Date.now()}.${ext}`, { type: blob.type });
-    selectedVideoFile = file;
-
-    // 切换到回放视图
-    const cameraFeed = document.getElementById("cameraFeed");
-    const playback = document.getElementById("recordPlayback");
-    const btnRecord = document.getElementById("btnRecord");
-    const doneBar = document.getElementById("recordDoneBar");
-    const doneText = document.getElementById("recordDoneText");
-
-    cameraFeed.style.display = "none";
-    playback.src = URL.createObjectURL(blob);
-    playback.style.display = "block";
-    btnRecord.style.display = "none";
-    doneBar.classList.add("active");
-    doneText.textContent = `✅ 录制完成 (${duration}秒, ${(file.size / 1024 / 1024).toFixed(1)}MB)`;
-  }
-
-  function retakeRecording() {
-    selectedVideoFile = null;
-    recordedChunks = [];
-
-    const cameraFeed = document.getElementById("cameraFeed");
-    const playback = document.getElementById("recordPlayback");
-    const placeholder = document.getElementById("recordPlaceholder");
-    const btnOpen = document.getElementById("btnOpenCamera");
-    const btnRecord = document.getElementById("btnRecord");
-    const doneBar = document.getElementById("recordDoneBar");
-    const timer = document.getElementById("recordTimer");
-
-    cameraFeed.style.display = "none";
-    cameraFeed.srcObject = null;
-    playback.style.display = "none";
-    playback.src = "";
-    placeholder.style.display = "block";
-    btnOpen.style.display = "inline-flex";
-    btnRecord.style.display = "none";
-    btnRecord.classList.remove("recording");
-    doneBar.classList.remove("active");
-    timer.classList.remove("active");
-
-    // 直接重新打开摄像头
-    openCamera();
-  }
-
-  // ==================== 收信人列表管理 ====================
-  let recipientCount = 0;
-
-  function addRecipient(name = "", relation = "", background = "") {
-    recipientCount++;
-    const list = document.getElementById("recipientList");
-    const idx = recipientCount;
-    const config = FESTIVAL_CONFIG[currentFestival];
-    
-    // 合并关系和背景
-    const combinedValue = background ? `${relation}, ${background}` : relation;
-
-    const row = document.createElement("div");
-    row.className = "recipient-row";
-    row.id = `recipient-${idx}`;
-    row.innerHTML = `
-      <span class="row-num">${list.children.length + 1}</span>
-      <div class="field">
-        <label>姓名</label>
-        <input type="text" class="r-name" placeholder="${config.namePlaceholder}" maxlength="20" value="${escapeHtml(name)}">
-      </div>
-      <div class="field">
-        <label>关系与背景</label>
-        <input type="text" class="r-relation-bg" placeholder="${config.relationPlaceholder}" maxlength="80" value="${escapeHtml(combinedValue)}">
-      </div>
-      <button class="btn-remove" onclick="removeRecipient('recipient-${idx}')" title="删除">✕</button>
-    `;
-    list.appendChild(row);
-    updateRowNumbers();
-  }
-
-  function removeRecipient(id) {
-    const list = document.getElementById("recipientList");
-    if (list.children.length <= 1) {
-      return; // 至少保留一行
-    }
-    const row = document.getElementById(id);
-    if (row) {
-      row.remove();
-      updateRowNumbers();
-    }
-  }
-
-  function updateRowNumbers() {
-    const rows = document.querySelectorAll(".recipient-row");
-    rows.forEach((row, i) => {
-      const num = row.querySelector(".row-num");
-      if (num) num.textContent = i + 1;
-    });
-  }
-
-  function getRecipients() {
-    const rows = document.querySelectorAll(".recipient-row");
-    const recipients = [];
-    rows.forEach((row) => {
-      const name = row.querySelector(".r-name").value.trim();
-      const relationBg = row.querySelector(".r-relation-bg").value.trim();
-      
-      if (name && relationBg) {
-        // 尝试分割关系和背景（用逗号、顿号或分号分隔）
-        const parts = relationBg.split(/[,，、；;]/);
-        const relation = parts[0].trim();
-        const background = parts.slice(1).join(',').trim();
-        
-        recipients.push({ name, relation, background });
-      }
-    });
-    return recipients;
-  }
-
-  function escapeHtml(str) {
-    const div = document.createElement("div");
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
-  // ==================== 台词预览相关状态 ====================
-  let previewData = null;       // 预览数据（从服务器返回）
-  let countdownTimer = null;    // 倒计时定时器
-  let countdownRemaining = 0;   // 剩余秒数
-  let countdownTotal = 0;       // 总秒数
-  let countdownPaused = false;  // 是否暂停（用户编辑时）
-
-  // ==================== 提交生成（改为先预览台词） ====================
-  async function handleSubmit() {
-    const senderName = document.getElementById("senderNameInput").value.trim();
-    const btn = document.getElementById("submitBtn");
-
-    // 验证
-    if (!senderName) {
-      alert("请输入您的名字");
-      return;
-    }
-    if (!selectedVideoFile) {
-      alert("请上传或录制一段祝福视频");
-      return;
-    }
-    const recipients = getRecipients();
-    if (recipients.length === 0) {
-      alert("请至少添加一个有效的祝福对象（名字和关系不能为空）");
-      return;
-    }
-
-    // 构造表单数据
-    const formData = new FormData();
-    formData.append("senderName", senderName);
-    formData.append("video", selectedVideoFile);
-    formData.append("recipients", JSON.stringify(recipients));
-    formData.append("festival", currentFestival);
-
-    // 禁用按钮，显示加载状态
-    btn.disabled = true;
-    document.getElementById("submitBtnText").textContent = "⏳ 正在生成台词预览...";
-
-    try {
-      const res = await fetch("/api/batch-preview", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "请求失败");
-      }
-
-      // 保存预览数据
-      previewData = data;
-      currentBatchId = data.batchId;
-
-      // 切换到预览视图
-      document.getElementById("formSection").style.display = "none";
-      showPreview(data);
-    } catch (err) {
-      alert("台词生成失败：" + err.message);
-    } finally {
-      btn.disabled = false;
-      const config = FESTIVAL_CONFIG[currentFestival];
-      document.getElementById("submitBtnText").textContent = config.submitText;
-    }
-  }
-
-  // ==================== 台词预览界面 ====================
-  function showPreview(data) {
-    const section = document.getElementById("previewSection");
-    section.classList.add("active");
-
-    // 渲染预览卡片
-    const container = document.getElementById("previewItems");
-    container.innerHTML = data.items.map((item, i) => {
-      const blessingTags = item.narration.blessings.map((b, bi) =>
-        `<input type="text" class="preview-blessing-tag" data-idx="${i}" data-bidx="${bi}" value="${escapeHtml(b)}" onfocus="pauseCountdown()" onblur="resumeCountdown()">`
-      ).join("");
-
-      return `
-        <div class="preview-card" id="preview-card-${i}">
-          <div class="preview-card-header">
-            <div class="preview-avatar">${i + 1}</div>
-            <div>
-              <div class="preview-name">致 ${escapeHtml(item.recipientName)}</div>
-              <div class="preview-relation">${escapeHtml(item.relation)}${item.background ? ' · ' + escapeHtml(item.background) : ''}</div>
-            </div>
-            <div class="preview-theme-badge">🎨 ${escapeHtml(item.narration.themeName)}</div>
-          </div>
-
-          <div class="preview-field">
-            <div class="preview-field-label">🏮 开场标题</div>
-            <input type="text" class="preview-field-value" data-idx="${i}" data-field="openingText" value="${escapeHtml(item.narration.openingText)}" onfocus="pauseCountdown()" onblur="resumeCountdown()">
-          </div>
-
-          <div class="preview-field">
-            <div class="preview-field-label">🎤 开场语音文案</div>
-            <textarea class="preview-field-value" data-idx="${i}" data-field="ttsOpeningText" rows="2" onfocus="pauseCountdown()" onblur="resumeCountdown()">${escapeHtml(item.narration.ttsOpeningText)}</textarea>
-          </div>
-
-          <div class="preview-field">
-            <div class="preview-field-label">✨ 祝福短语（画面展示）</div>
-            <div class="preview-blessings-row">
-              ${blessingTags}
-            </div>
-          </div>
-
-          <div class="preview-field">
-            <div class="preview-field-label">💬 主体祝福语音文案</div>
-            <textarea class="preview-field-value" data-idx="${i}" data-field="ttsBlessingText" rows="3" onfocus="pauseCountdown()" onblur="resumeCountdown()">${escapeHtml(item.narration.ttsBlessingText)}</textarea>
-          </div>
-
-          <div class="preview-field">
-            <div class="preview-field-label">😊 语音开心程度</div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <input type="range" class="preview-joyful-slider" data-idx="${i}" min="0" max="5" step="1" value="${item.narration.joyful ?? 3}" oninput="this.nextElementSibling.textContent=['😐','🙂','😊','😄','😆','🤩'][this.value]+' '+this.value" onfocus="pauseCountdown()" onblur="resumeCountdown()" style="flex:1;accent-color:var(--primary);height:6px;">
-              <span style="font-size:14px;min-width:36px;text-align:center;">${['😐','🙂','😊','😄','😆','🤩'][item.narration.joyful ?? 3]} ${item.narration.joyful ?? 3}</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join("");
-
-    // 启动倒计时：5秒 × 人数，最多15秒
-    countdownTotal = Math.min(data.items.length * 5, 15);
-    countdownRemaining = countdownTotal;
-    countdownPaused = false;
-    startCountdown();
-  }
-
-  function startCountdown() {
-    updateCountdownUI();
-    if (countdownTimer) clearInterval(countdownTimer);
-    countdownTimer = setInterval(() => {
-      if (countdownPaused) return;
-      countdownRemaining -= 0.1;
-      if (countdownRemaining <= 0) {
-        countdownRemaining = 0;
-        clearInterval(countdownTimer);
-        countdownTimer = null;
-        updateCountdownUI();
-        // 自动确认
-        confirmAndRender();
-        return;
-      }
-      updateCountdownUI();
-    }, 100);
-  }
-
-  function updateCountdownUI() {
-    const fill = document.getElementById("countdownFill");
-    const num = document.getElementById("countdownNum");
-    const pct = countdownTotal > 0 ? (countdownRemaining / countdownTotal) * 100 : 0;
-    fill.style.width = pct + "%";
-    num.textContent = Math.ceil(countdownRemaining);
-  }
-
-  function pauseCountdown() {
-    countdownPaused = true;
-    const countdownText = document.querySelector(".preview-countdown .countdown-text");
-    if (countdownText) {
-      countdownText.innerHTML = `<span style="color: var(--primary);">⏸ 编辑中 — 倒计时已暂停</span>`;
-    }
-  }
-
-  function resumeCountdown() {
-    // 延迟一点恢复，避免切换焦点时闪烁
-    setTimeout(() => {
-      // 如果还有其他输入框在聚焦，不恢复
-      const active = document.activeElement;
-      if (active && (active.classList.contains("preview-field-value") || active.classList.contains("preview-blessing-tag"))) {
-        return;
-      }
-      countdownPaused = false;
-      const countdownText = document.querySelector(".preview-countdown .countdown-text");
-      if (countdownText) {
-        countdownText.innerHTML = `<span class="countdown-num" id="countdownNum">${Math.ceil(countdownRemaining)}</span> 秒后自动开始制作视频`;
-      }
-      updateCountdownUI();
-    }, 200);
-  }
-
-  function stopCountdown() {
-    if (countdownTimer) {
-      clearInterval(countdownTimer);
-      countdownTimer = null;
-    }
-    countdownPaused = false;
-  }
-
-  // ==================== 返回表单 ====================
-  function backToForm() {
-    stopCountdown();
-    document.getElementById("previewSection").classList.remove("active");
-    document.getElementById("formSection").style.display = "block";
-    previewData = null;
-    currentBatchId = null;
-  }
-
-  // ==================== 确认台词并开始渲染 ====================
-  let isConfirming = false; // 防止重复提交
-  async function confirmAndRender() {
-    stopCountdown();
-
-    if (!previewData || !currentBatchId || isConfirming) return;
-    isConfirming = true;
-
-    const btnConfirm = document.getElementById("btnConfirm");
-    btnConfirm.disabled = true;
-    btnConfirm.textContent = "⏳ 正在启动视频制作...";
-
-    // 收集用户可能编辑过的台词
-    const narrations = previewData.items.map((item, i) => {
-      const card = document.getElementById(`preview-card-${i}`);
-      if (!card) return { index: i };
-
-      const openingText = card.querySelector('[data-field="openingText"]')?.value || item.narration.openingText;
-      const ttsOpeningText = card.querySelector('[data-field="ttsOpeningText"]')?.value || item.narration.ttsOpeningText;
-      const ttsBlessingText = card.querySelector('[data-field="ttsBlessingText"]')?.value || item.narration.ttsBlessingText;
-
-      // 收集祝福短语
-      const blessingInputs = card.querySelectorAll('.preview-blessing-tag');
-      const blessings = Array.from(blessingInputs).map(input => input.value.trim()).filter(Boolean);
-
-      // 收集开心程度
-      const joyfulSlider = card.querySelector('.preview-joyful-slider');
-      const joyful = joyfulSlider ? parseInt(joyfulSlider.value, 10) : (item.narration.joyful ?? 3);
-
-      return {
-        index: i,
-        openingText,
-        ttsOpeningText,
-        ttsBlessingText,
-        blessings: blessings.length > 0 ? blessings : item.narration.blessings,
-        joyful,
-      };
-    });
-
-    try {
-      const res = await fetch("/api/batch-confirm", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ batchId: currentBatchId, narrations }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "确认失败");
-      }
-
-      // 切换到进度视图
-      document.getElementById("previewSection").classList.remove("active");
-      const progressSection = document.getElementById("progressSection");
-      progressSection.classList.add("active");
-
-      const recipients = previewData.items.map(item => ({
-        name: item.recipientName,
-        relation: item.relation,
-        background: item.background,
-      }));
-
-      document.getElementById("progressTitle").textContent = "🎬 正在制作祝福视频...";
-      document.getElementById("progressSub").textContent =
-        `共 ${recipients.length} 个视频，AI 语音克隆 + 视频渲染，每个约 1-2 分钟`;
-
-      renderProgressItems(recipients);
-      startPolling();
-    } catch (err) {
-      isConfirming = false;
-      alert("启动渲染失败：" + err.message);
-      btnConfirm.disabled = false;
-      btnConfirm.textContent = "✨ 确认台词，开始制作";
-    }
-  }
-
-  // ==================== 进度追踪 ====================
-  function renderProgressItems(recipients) {
-    const container = document.getElementById("progressItems");
-    container.innerHTML = recipients.map((r, i) => {
-      const detail = r.background ? `${escapeHtml(r.relation)} · ${escapeHtml(r.background)}` : escapeHtml(r.relation);
-      return `
-        <div class="progress-item" id="progress-item-${i}">
-          <div class="status-icon pending" id="progress-icon-${i}">⏳</div>
-          <div class="item-info">
-            <div class="item-name">${escapeHtml(r.name)}</div>
-            <div class="item-detail">${detail}</div>
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  function startPolling() {
-    if (pollTimer) clearInterval(pollTimer);
-    pollTimer = setInterval(pollStatus, 2000);
-    // 立即查一次
-    pollStatus();
-  }
-
-  async function pollStatus() {
-    if (!currentBatchId) return;
-
-    try {
-      const res = await fetch(`/api/batch-status/${currentBatchId}`);
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("轮询失败:", data.error);
-        return;
-      }
-
-      // 更新进度条
-      const percent = data.total > 0 ? (data.completed / data.total) * 100 : 0;
-      document.getElementById("progressBar").style.width = percent + "%";
-
-      // 更新每一项的状态
-      data.items.forEach((item) => {
-        const icon = document.getElementById(`progress-icon-${item.index}`);
-        if (!icon) return;
-
-        // 移除旧状态
-        icon.classList.remove("pending", "processing", "done", "error");
-
-        switch (item.status) {
-          case "pending":
-            icon.classList.add("pending");
-            icon.textContent = "⏳";
-            break;
-          case "processing":
-            icon.classList.add("processing");
-            icon.textContent = "⚙️";
-            break;
-          case "done":
-            icon.classList.add("done");
-            icon.textContent = "✅";
-            break;
-          case "error":
-            icon.classList.add("error");
-            icon.textContent = "❌";
-            break;
-        }
-      });
-
-      // 检查是否全部完成
-      if (data.status === "done" || data.status === "error") {
-        clearInterval(pollTimer);
-        pollTimer = null;
-
-        // 延迟切换到结果页面
-        setTimeout(() => {
-          showResults(data);
-        }, 800);
-      }
-    } catch (e) {
-      console.error("轮询异常:", e);
-    }
-  }
-
-  // ==================== 结果展示 ====================
-  function showResults(data) {
-    document.getElementById("progressSection").classList.remove("active");
-    const resultSection = document.getElementById("resultSection");
-    resultSection.classList.add("active");
-
-    const doneCount = data.items.filter((i) => i.status === "done").length;
-    const errorCount = data.items.filter((i) => i.status === "error").length;
-
-    let summary = `成功生成 ${doneCount} 个视频`;
-    if (errorCount > 0) summary += `，${errorCount} 个失败`;
-    document.getElementById("resultSummary").textContent = summary;
-
-    // 如果没有成功的视频，隐藏打包按钮
-    document.getElementById("downloadAllBtn").style.display =
-      doneCount > 0 ? "inline-flex" : "none";
-
-    // 渲染结果列表
-    const container = document.getElementById("resultItems");
-    container.innerHTML = data.items
-      .map((item) => {
-        if (item.status === "done" && item.videoUrl) {
-          return `
-            <div class="result-item">
-              <video src="${item.videoUrl}" controls playsinline preload="metadata"></video>
-              <div class="result-info">
-                <div class="result-name">致 ${escapeHtml(item.recipientName)}</div>
-                <div class="result-relation">${escapeHtml(item.relation)}${item.themeName ? ` · 🎨 ${item.themeName}` : ''}</div>
-                <a class="btn-download-single" href="${item.videoUrl}" download="${item.filename || ''}">
-                  📥 下载视频
-                </a>
-              </div>
-            </div>
-          `;
-        } else if (item.status === "error") {
-          return `
-            <div class="result-item" style="opacity: 0.6;">
-              <div style="width:140px;aspect-ratio:9/16;background:rgba(255,60,60,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;">❌</div>
-              <div class="result-info">
-                <div class="result-name">致 ${escapeHtml(item.recipientName)}</div>
-                <div class="result-relation">${escapeHtml(item.relation)}${item.themeName ? ` · 🎨 ${item.themeName}` : ''}</div>
-                <div class="result-status-error">生成失败: ${escapeHtml(item.error || "未知错误")}</div>
-              </div>
-            </div>
-          `;
-        }
-        return "";
-      })
-      .join("");
-  }
-
-  // ==================== 打包下载 ====================
-  function downloadAll() {
-    if (!currentBatchId) return;
-    window.location.href = `/api/batch-download/${currentBatchId}`;
-  }
-
-  // ==================== 重置 ====================
-  function resetForm() {
-    currentBatchId = null;
-    previewData = null;
-    isConfirming = false;
-    stopCountdown();
-    if (pollTimer) {
-      clearInterval(pollTimer);
-      pollTimer = null;
-    }
-
-    document.getElementById("formSection").style.display = "block";
-    document.getElementById("previewSection").classList.remove("active");
-    document.getElementById("progressSection").classList.remove("active");
-    document.getElementById("resultSection").classList.remove("active");
-    document.getElementById("submitBtn").disabled = false;
-
-    // 重置表单
-    document.getElementById("senderNameInput").value = "";
-    selectedVideoFile = null;
-
-    // 重置上传区域
-    const area = document.getElementById("uploadArea");
-    area.classList.remove("has-file");
-    area.innerHTML = `
-      <div class="upload-icon">🎥</div>
-      <div class="upload-text">点击上传或拖拽视频到此处</div>
-      <div class="upload-hint">支持 MP4 格式，3-10秒，最大 50MB · 视频中请包含你的说话声音</div>
-      <input type="file" id="videoInput" accept="video/mp4,video/*">
-    `;
-    setupUpload();
-
-    // 重置录制区域
-    stopCamera();
-    recordedChunks = [];
-    const cameraFeed = document.getElementById("cameraFeed");
-    const playback = document.getElementById("recordPlayback");
-    const placeholder = document.getElementById("recordPlaceholder");
-    const btnOpen = document.getElementById("btnOpenCamera");
-    const btnRecord = document.getElementById("btnRecord");
-    const doneBar = document.getElementById("recordDoneBar");
-    const timer = document.getElementById("recordTimer");
-    cameraFeed.style.display = "none";
-    cameraFeed.srcObject = null;
-    playback.style.display = "none";
-    playback.src = "";
-    placeholder.style.display = "block";
-    btnOpen.style.display = "inline-flex";
-    btnRecord.style.display = "none";
-    btnRecord.classList.remove("recording");
-    doneBar.classList.remove("active");
-    timer.classList.remove("active");
-
-    // 切回上传模式
-    switchVideoMode("upload");
-
-    // 重置收信人列表
-    document.getElementById("recipientList").innerHTML = "";
-    recipientCount = 0;
-    addRecipient();
-    addRecipient();
-    addRecipient();
-  }
-
-  // ==================== 启动 ====================
-  init();
-</script>
+<script type="module" src="js/app.js"></script>
 </body>
 </html>

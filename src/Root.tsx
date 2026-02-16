@@ -4,6 +4,7 @@ import {
   type SpringFestivalProps,
   OUTRO_FRAMES,
 } from "./SpringFestivalVideo";
+import { FPS } from "./constants";
 
 const defaultProps: SpringFestivalProps = {
   senderName: "Noiz",
@@ -26,7 +27,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="SpringFestivalVideo"
         component={SpringFestivalVideo}
-        fps={30}
+        fps={FPS}
         width={1080}
         height={1920}
         defaultProps={defaultProps}

@@ -11,11 +11,10 @@ import {
 import { TextReveal } from "./components/TextReveal";
 import { BlessingText } from "./components/BlessingText";
 import { getTheme, type ThemeType, type FestivalType } from "./themes";
+import { TRANSITION_FRAMES, OUTRO_FRAMES } from "./constants";
 
-// 场景之间的过渡帧数
-const TRANSITION_FRAMES = 20;
-// 片尾推广固定 3 秒
-export const OUTRO_FRAMES = 90;
+// 导出给 Root.tsx 使用
+export { TRANSITION_FRAMES, OUTRO_FRAMES };
 
 const FadeTransition: React.FC<{
   children: React.ReactNode;
