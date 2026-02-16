@@ -107,151 +107,124 @@ function isValidationError(
   return "error" in result;
 }
 
-// ==================== 批量任务创建 ====================
+// ==================== 批量任务创建（预览模式） ====================
 
-async function createBatchJob(
+/**
+ * 创建台词预览任务
+ * 为每个收信人生成个性化台词，但不渲染视频
+ */
+async function createPreviewJob(
   validated: ValidatedBatchInput,
-  previewOnly: boolean,
   jobStore: JobStore,
   ttsProvider: TTSProvider,
   llmProvider: LLMProvider
-): Promise<{ batchId: string; total: number; items?: any[] }> {
+): Promise<{ batchId: string; total: number; items: any[] }> {
   const { senderName, recipients, festival, videoFile, audioFile, batchId } = validated;
 
   console.log(`\n${"=".repeat(60)}`);
-  console.log(
-    `🧧 ${previewOnly ? "台词预览任务" : "批量渲染任务"}: ${batchId} (${festival})`
-  );
+  console.log(`🧧 台词预览任务: ${batchId} (${festival})`);
   console.log(`   发送者: ${senderName}`);
   console.log(`   视频: ${videoFile}`);
   console.log(`   专用音频: ${audioFile ? `✅ ${audioFile}` : "❌ (将从视频提取)"}`);
   console.log(`   LLM: ${llmProvider.isConfigured() ? "✅" : "❌ (模板模式)"}`);
   console.log(`   TTS: ${ttsProvider.isConfigured() ? "✅" : "❌"}`);
   console.log(`   收信人数量: ${recipients.length}`);
-  if (!previewOnly) {
-    recipients.forEach((r, i) => {
-      console.log(`   ${i + 1}. ${r.name} (${r.relation}) ${r.background ? `- ${r.background}` : ""}`);
-    });
-  }
   console.log(`${"=".repeat(60)}\n`);
 
-  if (previewOnly) {
-    const videoAbsPath = path.join(PUBLIC_DIR, videoFile);
-    const dedicatedAudioAbsPath = audioFile ? path.join(PUBLIC_DIR, audioFile) : undefined;
+  // 提取或转换音频（用于 Gemini 上下文和声音克隆）
+  const videoAbsPath = path.join(PUBLIC_DIR, videoFile);
+  const dedicatedAudioAbsPath = audioFile ? path.join(PUBLIC_DIR, audioFile) : undefined;
 
-    let previewAudioPath: string | undefined;
-    let dedicatedAudioWavPath: string | undefined;
-    const needAudio = llmProvider.isConfigured() || ttsProvider.isConfigured();
+  let previewAudioPath: string | undefined;
+  let dedicatedAudioWavPath: string | undefined;
+  const needAudio = llmProvider.isConfigured() || ttsProvider.isConfigured();
 
-    if (dedicatedAudioAbsPath && needAudio) {
-      console.log("🎙️ 用户提供了专用声音样本，正在转换...");
-      const wavPath = path.join(TEMP_DIR, `dedicated_audio_${batchId}.wav`);
-      const success = await convertToWav(dedicatedAudioAbsPath, wavPath);
-      if (success && fs.existsSync(wavPath) && fs.statSync(wavPath).size > 0) {
-        dedicatedAudioWavPath = wavPath;
-        previewAudioPath = wavPath;
-        const audioSizeMB = fs.statSync(wavPath).size / (1024 * 1024);
-        console.log(`✅ 专用声音样本转换成功 (${audioSizeMB.toFixed(1)}MB)`);
-      } else {
-        console.warn("⚠️ 专用声音样本转换失败，将从视频提取");
-      }
+  if (dedicatedAudioAbsPath && needAudio) {
+    console.log("🎙️ 用户提供了专用声音样本，正在转换...");
+    const wavPath = path.join(TEMP_DIR, `dedicated_audio_${batchId}.wav`);
+    const success = await convertToWav(dedicatedAudioAbsPath, wavPath);
+    if (success && fs.existsSync(wavPath) && fs.statSync(wavPath).size > 0) {
+      dedicatedAudioWavPath = wavPath;
+      previewAudioPath = wavPath;
+      const audioSizeMB = fs.statSync(wavPath).size / (1024 * 1024);
+      console.log(`✅ 专用声音样本转换成功 (${audioSizeMB.toFixed(1)}MB)`);
+    } else {
+      console.warn("⚠️ 专用声音样本转换失败，将从视频提取");
     }
-
-    if (!previewAudioPath && needAudio) {
-      console.log("🎵 正在从视频中提取音轨...");
-      const audioPath = path.join(TEMP_DIR, `audio_${batchId}.wav`);
-      const hasAudio = await extractAudioFromVideo(videoAbsPath, audioPath);
-      if (hasAudio) {
-        previewAudioPath = audioPath;
-        const audioSizeMB = fs.statSync(audioPath).size / (1024 * 1024);
-        console.log(`✅ 音轨提取成功 (${audioSizeMB.toFixed(1)}MB)`);
-      } else {
-        console.warn("⚠️ 视频没有可用的音轨");
-      }
-    }
-
-    const previewItems: Array<{
-      index: number;
-      recipient: Recipient;
-      narration: GeneratedNarration;
-    }> = [];
-
-    for (let i = 0; i < recipients.length; i++) {
-      const recipient = recipients[i];
-      console.log(`📝 [${i + 1}/${recipients.length}] 正在为 ${recipient.name} 生成台词...`);
-      const narration = await generateNarration(recipient, senderName, festival, previewAudioPath);
-      console.log(`   开场: ${narration.openingText}`);
-      console.log(`   祝福: ${narration.blessings.join(" | ")}`);
-      previewItems.push({ index: i, recipient, narration });
-    }
-
-    const job: BatchJob = {
-      id: batchId,
-      senderName,
-      videoFile,
-      audioFile,
-      festival,
-      extractedAudioPath: previewAudioPath,
-      dedicatedAudioPath: dedicatedAudioWavPath,
-      items: previewItems.map((p) => ({
-        index: p.index,
-        recipient: p.recipient,
-        status: "pending" as const,
-        narration: p.narration,
-        theme: p.narration.theme,
-      })),
-      createdAt: Date.now(),
-      previewOnly: true,
-      status: "processing",
-    };
-    jobStore.set(batchId, job);
-
-    console.log(`✅ 台词预览生成完成，等待用户确认`);
-
-    return {
-      batchId,
-      total: recipients.length,
-      items: previewItems.map((p) => ({
-        index: p.index,
-        recipientName: p.recipient.name,
-        relation: p.recipient.relation,
-        background: p.recipient.background,
-        narration: {
-          openingText: p.narration.openingText,
-          blessings: p.narration.blessings,
-          ttsOpeningText: p.narration.ttsOpeningText,
-          ttsBlessingText: p.narration.ttsBlessingText,
-          theme: p.narration.theme,
-          themeName: themes[p.narration.theme].name,
-          joyful: p.narration.joyful,
-        },
-      })),
-    };
-  } else {
-    const job: BatchJob = {
-      id: batchId,
-      senderName,
-      videoFile,
-      festival,
-      items: recipients.map((r, i) => ({
-        index: i,
-        recipient: r,
-        status: "pending" as const,
-      })),
-      createdAt: Date.now(),
-      status: "processing",
-    };
-
-    jobStore.set(batchId, job);
-
-    processBatchJob(batchId, jobStore, ttsProvider, llmProvider).catch((err) => {
-      console.error("批量处理出错:", err);
-      const j = jobStore.get(batchId);
-      if (j) j.status = "error";
-    });
-
-    return { batchId, total: recipients.length };
   }
+
+  if (!previewAudioPath && needAudio) {
+    console.log("🎵 正在从视频中提取音轨...");
+    const audioPath = path.join(TEMP_DIR, `audio_${batchId}.wav`);
+    const hasAudio = await extractAudioFromVideo(videoAbsPath, audioPath);
+    if (hasAudio) {
+      previewAudioPath = audioPath;
+      const audioSizeMB = fs.statSync(audioPath).size / (1024 * 1024);
+      console.log(`✅ 音轨提取成功 (${audioSizeMB.toFixed(1)}MB)`);
+    } else {
+      console.warn("⚠️ 视频没有可用的音轨");
+    }
+  }
+
+  // 为每个收信人生成台词
+  const previewItems: Array<{
+    index: number;
+    recipient: Recipient;
+    narration: GeneratedNarration;
+  }> = [];
+
+  for (let i = 0; i < recipients.length; i++) {
+    const recipient = recipients[i];
+    console.log(`📝 [${i + 1}/${recipients.length}] 正在为 ${recipient.name} 生成台词...`);
+    const narration = await generateNarration(recipient, senderName, festival, previewAudioPath);
+    console.log(`   开场: ${narration.openingText}`);
+    console.log(`   祝福: ${narration.blessings.join(" | ")}`);
+    previewItems.push({ index: i, recipient, narration });
+  }
+
+  // 保存预览任务
+  const job: BatchJob = {
+    id: batchId,
+    senderName,
+    videoFile,
+    audioFile,
+    festival,
+    extractedAudioPath: previewAudioPath,
+    dedicatedAudioPath: dedicatedAudioWavPath,
+    items: previewItems.map((p) => ({
+      index: p.index,
+      recipient: p.recipient,
+      status: "pending" as const,
+      narration: p.narration,
+      theme: p.narration.theme,
+    })),
+    createdAt: Date.now(),
+    previewOnly: true,
+    status: "processing",
+  };
+  jobStore.set(batchId, job);
+
+  console.log(`✅ 台词预览生成完成，等待用户确认`);
+
+  return {
+    batchId,
+    total: recipients.length,
+    items: previewItems.map((p) => ({
+      index: p.index,
+      recipientName: p.recipient.name,
+      relation: p.recipient.relation,
+      background: p.recipient.background,
+      narration: {
+        openingText: p.narration.openingText,
+        blessings: p.narration.blessings,
+        ttsOpeningText: p.narration.ttsOpeningText,
+        ttsBlessingText: p.narration.ttsBlessingText,
+        theme: p.narration.theme,
+        themeName: themes[p.narration.theme].name,
+        joyful: p.narration.joyful,
+      },
+    })),
+  };
 }
 
 // ==================== 路由注册 ====================
@@ -271,7 +244,7 @@ export function registerBatchRoutes(
       if (isValidationError(validated)) {
         return res.status(validated.status).json({ error: validated.error });
       }
-      const result = await createBatchJob(validated, true, jobStore, ttsProvider, llmProvider);
+      const result = await createPreviewJob(validated, jobStore, ttsProvider, llmProvider);
       res.json(result);
     })
   );
@@ -329,20 +302,6 @@ export function registerBatchRoutes(
       });
 
       res.json({ batchId, total: job.items.length });
-    })
-  );
-
-  // 旧接口兼容
-  app.post(
-    "/api/batch-render",
-    uploadFields,
-    asyncHandler(async (req, res) => {
-      const validated = validateBatchRequest(req);
-      if (isValidationError(validated)) {
-        return res.status(validated.status).json({ error: validated.error });
-      }
-      const result = await createBatchJob(validated, false, jobStore, ttsProvider, llmProvider);
-      res.json(result);
     })
   );
 
